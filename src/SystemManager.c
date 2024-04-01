@@ -24,6 +24,7 @@
 #include "SystemManager.h"
 
 #include "AuthorizationRequestsManager.h"
+#include "MonitorEngine.h"
 #include "SystemManager/config.h"
 #include "log.h"
 
@@ -69,14 +70,30 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	pid_t pid = fork();
-	if (pid < 0) {
-		perror("Fork failed");
-		exit(EXIT_FAILURE);
-	} else if (pid == 0) {
-		authorizationRequestsManager(shmid);
-		exit(EXIT_SUCCESS);
+#define N_FORKS 2
+	pid_t pids[N_FORKS];
+	for (int i = 0; i < N_FORKS; ++i) {
+		pids[i] = fork();
+
+		if (pids[i] == 0) {
+			switch (i) {
+			case 0:
+				authorizationRequestsManager(shmid);
+				break;
+			case 1:
+				monitorEngine();
+				break;
+			}
+
+			exit(EXIT_SUCCESS);
+		} else if (pids[i] < 0) {
+			perror("Fork Failed\n");
+			// TODO: Other successful process forks might become
+			// orphan
+			exit(EXIT_FAILURE);
+		}
 	}
+#undef N_FORKS
 
 	char *sharedMemory;
 	if ((sharedMemory = shmat(shmid, NULL, 0)) == (char *) -1) {
