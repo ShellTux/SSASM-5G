@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SYSTEM_MANAGER_CONFIG_H
+#define SYSTEM_MANAGER_CONFIG_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
@@ -24,6 +24,10 @@
  *
  ***************************************************************************/
 
-void usage(const char *const programName);
+#include <stdbool.h>
 
-#endif // !SYSTEM_MANAGER_H
+#define CONFIG_FILE_N_LINES 6
+
+bool isValidSystemManagerConfigFile(const char *const configFilepath);
+
+#endif // !SYSTEM_MANAGER_CONFIG_H

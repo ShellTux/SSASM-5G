@@ -1,9 +1,10 @@
 MAKEFLAGS += --jobs=4 --output-sync=target
 
-ARCHIVE          = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
-INCLUDE_DIR      = $(PWD)/include
-OBJ_DIR          = obj
-SRC_DIR          = src
+ARCHIVE     = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
+INCLUDE_DIR = $(PWD)/include
+OBJ_DIR     = obj
+SRC_DIR     = src
+TARGETS     = 5g_auth_platform
 
 HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
@@ -31,6 +32,12 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	@printf "\033[0m\n"
 	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+SOURCES = SystemManager SystemManager/config utils/string
+5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+
+$(TARGETS): %:
+	$(CC) $(CFLAGS) -fdiagnostics-color=always -o $@ $^
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`

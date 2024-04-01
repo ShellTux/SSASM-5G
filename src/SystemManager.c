@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,6 +21,43 @@
  *
  ***************************************************************************/
 
-void usage(const char *const programName);
+#include "SystemManager.h"
 
-#endif // !SYSTEM_MANAGER_H
+#include "SystemManager/config.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char **argv)
+{
+	for (int i = 0; i < argc; ++i) {
+		const char *const arg = argv[i];
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
+			usage(argv[0]);
+		}
+	}
+
+	if (argc != 2) {
+		usage(argv[0]);
+	}
+
+	const char *const configFilepath = argv[1];
+
+	bool isConfigValid = isValidSystemManagerConfigFile(configFilepath);
+	printf("Config file \"%s\" is Valid: %d\n",
+	       configFilepath,
+	       isConfigValid);
+
+	return EXIT_SUCCESS;
+}
+
+void usage(const char *const programName)
+{
+	printf("Usage: %s [options] <config file>\n", programName);
+	printf("Options:\n");
+	printf("  -h, --help                   Print this usage message\n");
+
+	exit(EXIT_FAILURE);
+}

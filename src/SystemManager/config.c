@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,6 +21,45 @@
  *
  ***************************************************************************/
 
-void usage(const char *const programName);
+#include "SystemManager/config.h"
 
-#endif // !SYSTEM_MANAGER_H
+#include "utils/string.h"
+
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+bool isValidSystemManagerConfigFile(const char *const configFilepath)
+{
+	FILE *configFile = fopen(configFilepath, "r");
+	if (configFile == NULL) {
+		fprintf(stderr, "Error opening file: \"%s\"\n", configFilepath);
+		exit(EXIT_FAILURE);
+	}
+
+	bool isValid = true;
+	char line[100];
+	int lineCount = 0;
+	while (fgets(line, sizeof(line), configFile) != NULL) {
+		lineCount++;
+
+		if (lineCount > CONFIG_FILE_N_LINES) {
+			break;
+		}
+
+		trim(line);
+		for (int i = 0; line[i] != '\0'; i++) {
+			if (isdigit(line[i])) {
+				continue;
+			}
+
+			isValid &= false;
+			break;
+		}
+	}
+
+	fclose(configFile);
+
+	return isValid && lineCount == CONFIG_FILE_N_LINES;
+}

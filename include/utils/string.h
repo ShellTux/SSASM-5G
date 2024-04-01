@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef STRING_H
+#define STRING_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
@@ -24,6 +24,6 @@
  *
  ***************************************************************************/
 
-void usage(const char *const programName);
+char *trim(char *string);
 
-#endif // !SYSTEM_MANAGER_H
+#endif // !STRING_H
