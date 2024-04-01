@@ -1,6 +1,7 @@
 .clangd
 obj/
 *.pdf
+*.zip
 
 # Prerequisites
 *.d
