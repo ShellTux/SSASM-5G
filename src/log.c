@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "SystemManager/log.h"
+#include "log.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -52,12 +52,14 @@ void logMessage(const char *const format, ...)
 	va_start(args, format);
 	printf(TIMESTAMP_FORMAT, timestamp);
 	vprintf(format, args);
+	printf("\n");
 	va_end(args);
 
 	// NOTE: logfile
 	va_start(args, format);
 	fprintf(logFile, TIMESTAMP_FORMAT, timestamp);
 	vfprintf(logFile, format, args);
+	fprintf(logFile, "\n");
 	va_end(args);
 
 #undef TIMESTAMP_FORMAT

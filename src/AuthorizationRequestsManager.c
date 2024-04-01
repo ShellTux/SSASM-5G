@@ -23,7 +23,7 @@
 
 #include "AuthorizationRequestsManager.h"
 
-#include "SystemManager/log.h"
+#include "log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@
 
 void authorizationRequestsManager(const int sharedMemoryID)
 {
-	logMessage("%s\n", LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
+	logMessage(LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
 
 	sleep(1);
 

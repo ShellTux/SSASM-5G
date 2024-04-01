@@ -25,7 +25,7 @@
 
 #include "AuthorizationRequestsManager.h"
 #include "SystemManager/config.h"
-#include "SystemManager/log.h"
+#include "log.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -56,9 +56,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	logMessage("%s\n", LOG_SIMULATOR_START);
+	logMessage(LOG_SIMULATOR_START);
 
-	logMessage("%s\n", LOG_SYSTEM_MANAGER_PROCESS_CREATED);
+	logMessage(LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
 	int shmid;
 	if ((shmid = shmget(SHARED_MEMORY_KEY,
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	logMessage("%s\n", LOG_SIMULATOR_END);
+	logMessage(LOG_SIMULATOR_END);
 
 	return EXIT_SUCCESS;
 }

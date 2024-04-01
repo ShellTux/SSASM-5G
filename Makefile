@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = SystemManager SystemManager/config SystemManager/log AuthorizationRequestsManager utils/string
+SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager log utils/string
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): %:
