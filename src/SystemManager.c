@@ -24,6 +24,7 @@
 #include "SystemManager.h"
 
 #include "SystemManager/config.h"
+#include "SystemManager/log.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -45,10 +46,12 @@ int main(int argc, char **argv)
 
 	const char *const configFilepath = argv[1];
 
-	bool isConfigValid = isValidSystemManagerConfigFile(configFilepath);
-	printf("Config file \"%s\" is Valid: %d\n",
-	       configFilepath,
-	       isConfigValid);
+	if (!isValidSystemManagerConfigFile(configFilepath)) {
+		exit(EXIT_FAILURE);
+	}
+
+	logMessage("%s\n", SIMULATOR_START_LOG);
+	logMessage("%s\n", SIMULATOR_END_LOG);
 
 	return EXIT_SUCCESS;
 }

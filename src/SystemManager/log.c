@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,9 +21,53 @@
  *
  ***************************************************************************/
 
-#define SIMULATOR_START_LOG "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define SIMULATOR_END_LOG   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include "SystemManager/log.h"
 
-void usage(const char *const programName);
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-#endif // !SYSTEM_MANAGER_H
+FILE *logFile = NULL;
+
+void logMessage(const char *const format, ...)
+{
+	openLogFile();
+
+	time_t rawtime;
+	time(&rawtime);
+
+#define MAX_SIZE 10
+	char timestamp[MAX_SIZE];
+	const struct tm *timeinfo = localtime(&rawtime);
+	strftime(timestamp, MAX_SIZE, TIME_FORMAT, timeinfo);
+#undef MAX_SIZE
+
+
+	va_list args;
+
+#define TIMESTAMP_FORMAT "%s   "
+
+	// NOTE: stdout
+	va_start(args, format);
+	printf(TIMESTAMP_FORMAT, timestamp);
+	vprintf(format, args);
+	va_end(args);
+
+	// NOTE: logfile
+	va_start(args, format);
+	fprintf(logFile, TIMESTAMP_FORMAT, timestamp);
+	vfprintf(logFile, format, args);
+	va_end(args);
+
+#undef TIMESTAMP_FORMAT
+}
+
+void openLogFile(void)
+{
+	if (logFile != NULL) {
+		return;
+	}
+
+	logFile = fopen(LOG_FILEPATH, "a");
+}

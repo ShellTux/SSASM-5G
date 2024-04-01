@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SYSTEM_MANAGER_LOG_H
+#define SYSTEM_MANAGER_LOG_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
@@ -24,9 +24,20 @@
  *
  ***************************************************************************/
 
-#define SIMULATOR_START_LOG "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define SIMULATOR_END_LOG   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include <stdio.h>
 
-void usage(const char *const programName);
+#define ANSI_LENGTH 10
+#define RED         "\e[31m"
+#define GREEN       "\e[32m"
+#define BLUE        "\e[34m"
+#define CYAN        "\e[36m"
+#define YELLOW      "\e[33m"
+#define RESET       "\e[0m"
 
-#endif // !SYSTEM_MANAGER_H
+#define TIME_FORMAT  "%H:%M:%S"
+#define LOG_FILEPATH "system-manager.log"
+
+void openLogFile(void);
+void logMessage(const char *const format, ...);
+
+#endif // !SYSTEM_MANAGER_LOG_H
