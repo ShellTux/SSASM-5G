@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,15 +21,33 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "AuthorizationRequestsManager.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include "SystemManager/log.h"
 
-#define SHARED_MEMORY_KEY         1234
-#define SHARED_MEMORY_SIZE        1024
-#define SHARED_MEMORY_PERMISSIONS 0644
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/shm.h>
+#include <unistd.h>
 
-void usage(const char *const programName);
+void authorizationRequestsManager(const int sharedMemoryID)
+{
+	logMessage("%s\n", LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
 
-#endif // !SYSTEM_MANAGER_H
+	sleep(1);
+
+	char *sharedMemory;
+	if ((sharedMemory = shmat(sharedMemoryID, NULL, 0)) == (char *) -1) {
+		perror("IPC error: shmat");
+		exit(EXIT_FAILURE);
+	}
+
+	sleep(3);
+
+	if (shmdt(sharedMemory) == -1) {
+		perror("IPC error: shmdt");
+		exit(EXIT_FAILURE);
+	}
+
+	sleep(1);
+}

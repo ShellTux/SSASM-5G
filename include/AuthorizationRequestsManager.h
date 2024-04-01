@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef AUTHORIZATION_REQUESTS_MANAGER_H
+#define AUTHORIZATION_REQUESTS_MANAGER_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
@@ -24,15 +24,9 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
+	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+void authorizationRequestsManager(const int sharedMemoryID);
 
-#define SHARED_MEMORY_KEY         1234
-#define SHARED_MEMORY_SIZE        1024
-#define SHARED_MEMORY_PERMISSIONS 0644
-
-void usage(const char *const programName);
-
-#endif // !SYSTEM_MANAGER_H
+#endif // !AUTHORIZATION_REQUESTS_MANAGER_H

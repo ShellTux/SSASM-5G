@@ -23,6 +23,7 @@
 
 #include "SystemManager.h"
 
+#include "AuthorizationRequestsManager.h"
 #include "SystemManager/config.h"
 #include "SystemManager/log.h"
 
@@ -32,6 +33,9 @@
 #include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -52,7 +56,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	logMessage("%s\n", SIMULATOR_START_LOG);
+	logMessage("%s\n", LOG_SIMULATOR_START);
+
+	logMessage("%s\n", LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
 	int shmid;
 	if ((shmid = shmget(SHARED_MEMORY_KEY,
@@ -63,11 +69,23 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	pid_t pid = fork();
+	if (pid < 0) {
+		perror("Fork failed");
+		exit(EXIT_FAILURE);
+	} else if (pid == 0) {
+		authorizationRequestsManager(shmid);
+		exit(EXIT_SUCCESS);
+	}
+
 	char *sharedMemory;
 	if ((sharedMemory = shmat(shmid, NULL, 0)) == (char *) -1) {
 		perror("IPC error: shmat");
 		exit(EXIT_FAILURE);
 	}
+
+	int status;
+	while ((wait(&status)) > 0) {}
 
 	if (shmdt(sharedMemory) == -1) {
 		perror("IPC error: shmdt");
@@ -79,7 +97,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	logMessage("%s\n", SIMULATOR_END_LOG);
+	logMessage("%s\n", LOG_SIMULATOR_END);
 
 	return EXIT_SUCCESS;
 }
