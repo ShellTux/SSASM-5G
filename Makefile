@@ -16,6 +16,7 @@ CFLAGS  = -Wall -Wextra -Werror
 CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable
 CFLAGS += -Wno-error=unused-but-set-variable
+CFLAGS += -fdiagnostics-color=always
 CFLAGS += -I$(INCLUDE_DIR)
 LINKS   =
 
@@ -37,7 +38,7 @@ SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager log ut
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): %:
-	$(CC) $(CFLAGS) -fdiagnostics-color=always -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`
