@@ -1,8 +1,9 @@
 # Simulador de Sistema de Autorização de Serviços Móveis 5G
 
 ---
-title: Relatório
-author: Luís Góis, David Carvalheiro
-date: março 21, 2024
+title: Trabalho Prático - Meta 1 - Relatório
+subtitle: Sistemas Operativos
+author: David Carvalheiro, Luís Góis
+date: date
 ---
 
