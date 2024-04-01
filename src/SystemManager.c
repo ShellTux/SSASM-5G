@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 int main(int argc, char **argv)
 {
@@ -51,6 +53,32 @@ int main(int argc, char **argv)
 	}
 
 	logMessage("%s\n", SIMULATOR_START_LOG);
+
+	int shmid;
+	if ((shmid = shmget(SHARED_MEMORY_KEY,
+	                    SHARED_MEMORY_SIZE,
+	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
+	    < 0) {
+		perror("IPC error: shmget");
+		exit(EXIT_FAILURE);
+	}
+
+	char *sharedMemory;
+	if ((sharedMemory = shmat(shmid, NULL, 0)) == (char *) -1) {
+		perror("IPC error: shmat");
+		exit(EXIT_FAILURE);
+	}
+
+	if (shmdt(sharedMemory) == -1) {
+		perror("IPC error: shmdt");
+		exit(EXIT_FAILURE);
+	}
+
+	if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+		perror("IPC error: shmctl");
+		exit(EXIT_FAILURE);
+	}
+
 	logMessage("%s\n", SIMULATOR_END_LOG);
 
 	return EXIT_SUCCESS;
