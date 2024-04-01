@@ -1,4 +1,7 @@
+5g_auth_platform
+backoffice_user
 .clangd
+mobile_user
 obj/
 *.pdf
 *.zip
