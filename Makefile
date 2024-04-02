@@ -45,6 +45,7 @@ SOURCES = MobileUser
 mobile_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): %:
+	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname $@`
