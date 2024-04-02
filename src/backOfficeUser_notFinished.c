@@ -8,9 +8,6 @@
 #include <sys/msg.h>
 
 
-
-void send_message(int user_id, const char *service_id, int data_reservation) {}
-
 void sigint_handler(int signum) {
     printf("Received SIGINT. Exiting...\n");
     exit(EXIT_SUCCESS);
