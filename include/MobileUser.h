@@ -1,3 +1,6 @@
+#ifndef MOBILE_USER_H
+#define MOBILE_USER_H
+
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____ 
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -21,51 +24,14 @@
  *
  ***************************************************************************/
 
-#include "BackOfficeUser.h"
+#define ID_VIDEO  VIDEO
+#define ID_MUSIC  MUSIC
+#define ID_SOCIAL SOCIAL
 
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+void usage(const char *const programName);
+void sendMessage(const int userID,
+                 const char *const service_id,
+                 const int dataReservation);
+void sigintHandler(const int signal);
 
-int main()
-{
-	signal(SIGINT, sigintHandler);
-
-	bool dataStats  = false;
-	bool resetStats = false;
-
-	while (true) {
-		char command[COMMAND_MAX + 1];
-		scanf("%s", command);
-
-		if (strncmp(command, "data_stats", COMMAND_MAX) == 0) {
-			dataStats = true;
-		} else if (strncmp(command, "reset", COMMAND_MAX) == 0) {
-			resetStats = true;
-		} else {
-			printf(INVALID_COMMAND);
-			continue;
-		}
-
-		if (dataStats) {
-			printf("Service\t\tTotal Data\tAuth Reqs\n");
-			dataStats = false;
-		}
-
-		if (resetStats) {
-			printf("Statistics cleared.\n");
-			resetStats = false;
-		}
-	}
-
-	return EXIT_SUCCESS;
-}
-
-void sigintHandler(const int signal)
-{
-	(void) signal;
-	printf(SIGINT_MESSAGE);
-	exit(EXIT_SUCCESS);
-}
+#endif // !MOBILE_USER_H
