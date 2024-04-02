@@ -24,13 +24,24 @@
  *
  ***************************************************************************/
 
-#define ID_VIDEO  "VIDEO"
-#define ID_MUSIC  "MUSIC"
-#define ID_SOCIAL "SOCIAL"
+#define SERVICES       \
+	WRAPPER(VIDEO) \
+	WRAPPER(MUSIC) \
+	WRAPPER(SOCIAL)
+
+typedef enum {
+#define WRAPPER(ENUM) ENUM,
+	SERVICES
+#undef WRAPPER
+} Service;
+
+const char *serviceString(const Service service);
+
+#define AUTHORIZATION_MESSAGE_FORMAT "%d#%s#%d"
 
 void usage(const char *const programName);
 void sendMessage(const int userID,
-                 const char *const service_id,
+                 const Service service,
                  const int dataReservation);
 void sigintHandler(const int signal);
 

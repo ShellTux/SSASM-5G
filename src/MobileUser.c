@@ -52,19 +52,19 @@ int main(int argc, char *argv[])
 	const int intervaloMusic  = atoi(argv[4]);
 	const int intervaloSocial = atoi(argv[5]);
 	const int dadosReservar   = atoi(argv[6]);
-	const pid_t userID       = getpid();
+	const pid_t userID        = getpid();
 
 	int authorizationRequests = 0;
 	while (true) {
 		if (authorizationRequests > numPedidos) break;
 
-		sendMessage(userID, ID_VIDEO, dadosReservar);
+		sendMessage(userID, VIDEO, dadosReservar);
 		authorizationRequests++;
 
-		sendMessage(userID, ID_MUSIC, dadosReservar);
+		sendMessage(userID, MUSIC, dadosReservar);
 		authorizationRequests++;
 
-		sendMessage(userID, ID_SOCIAL, dadosReservar);
+		sendMessage(userID, SOCIAL, dadosReservar);
 		authorizationRequests++;
 	}
 
@@ -74,8 +74,9 @@ int main(int argc, char *argv[])
 void usage(const char *const programName)
 {
 	fprintf(stderr,
-	        "Usage: %s <plafond_inicial> <num_pedidos>  <intervalo_video>"
-	        "<intervalo_music> <intervalo_social> <dados_reservar>\n",
+	        "Usage: %s [options] <plafond_inicial> <num_pedidos> "
+	        "<intervalo_video> <intervalo_music> <intervalo_social> "
+	        "<dados_reservar>\n",
 	        programName);
 	exit(EXIT_FAILURE);
 }
@@ -85,4 +86,28 @@ void sigintHandler(const int signal)
 	(void) signal;
 	printf("Received SIGINT. Exiting...\n");
 	exit(EXIT_SUCCESS);
+}
+
+void sendMessage(const int userID,
+                 const Service service,
+                 const int dataReservation)
+{
+	printf(AUTHORIZATION_MESSAGE_FORMAT "\n",
+	       userID,
+	       serviceString(service),
+	       dataReservation);
+}
+
+const char *serviceString(const Service service)
+{
+	switch (service) {
+#define WRAPPER(ENUM)         \
+	case ENUM: {          \
+		return #ENUM; \
+	};
+		SERVICES
+#undef WRAPPER
+	}
+
+	return NULL;
 }
