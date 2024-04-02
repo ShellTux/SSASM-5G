@@ -30,7 +30,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	@printf "Building %s\n" $@
 	@printf "########################\n"
 	@printf "\033[0m\n"
-	mkdir -p `dirname $@`
+	mkdir --parents `dirname "$@"`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string
@@ -47,7 +47,7 @@ $(TARGETS): %:
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.md: %.md
-	mkdir --parents `dirname $@`
+	mkdir --parents `dirname "$@"`
 	cp $< $@
 	sed -i 's|/assets|assets|g' $@
 	sed -i 's|date: date|date: '$(shell date +'%d/%m/%Y')'|' $@
