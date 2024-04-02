@@ -75,6 +75,12 @@ clean:
 	rm -f $(TARGETS)
 	rm -rf $(OBJ_DIR)
 
+.PHONY: clean-ipcs
+clean-ipcs:
+	@test $(shell id --user) -ge 1000 \
+		&& echo ipcrm --all && ipcrm --all \
+		|| printf '%s\n' 'This rule is meant to remove non-root ipc resources'
+
 .PHONY: watch
 watch:
 	@while true ;\
