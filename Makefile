@@ -1,5 +1,3 @@
-MAKEFLAGS += --jobs=4 --output-sync=target
-
 ARCHIVE     = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
 INCLUDE_DIR = $(PWD)/include
 OBJ_DIR     = obj
@@ -21,7 +19,7 @@ CFLAGS += -I$(INCLUDE_DIR)
 CFLAGS += -pthread
 LINKS   =
 
-all: $(TARGETS)
+all: warning $(TARGETS)
 
 debug: CFLAGS += -g -DDEBUG=1
 debug: clean all
@@ -44,6 +42,7 @@ backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 SOURCES = MobileUser
 mobile_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
+$(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target
 $(TARGETS): %:
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -93,6 +92,7 @@ watch:
 	@while true ;\
 	do \
 		clear ; \
+		$(MAKE) warning --no-print-directory || exit 1 \
 		$(MAKE) --no-print-directory; \
 		inotifywait --quiet --event modify --recursive $(INCLUDE_DIR) --recursive $(SRC_DIR); \
 	done
@@ -100,3 +100,12 @@ watch:
 .PHONY: PRINT-MACROS
 PRINT-MACROS:
 	@make -p MAKE-MACROS| grep -A1 "^# makefile" | grep -v "^#\|^--" | sort
+
+.PHONY: warning
+warning:
+	@pwd | grep --quiet ' ' \
+		&& printf '\033[33m[WARNING]\033[0m: %s\n' 'Current working directory of Makefile contains spaces. This is known to cause bugs.' \
+		&& printf '\033[36m[INFO]\033[0m:    pwd: "%s"\n' "$(shell pwd)" \
+		&& printf '%s\n' 'Please Try compiling by making sure the full path to this Makefile does not contain spaces.' \
+		&& exit 1 \
+		|| true
