@@ -27,10 +27,19 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 
 int main(int argc, char *argv[])
 {
+	for (int i = 0; i < argc; ++i) {
+		const char *const arg = argv[i];
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
+			usage(argv[0]);
+		}
+	}
+
 	if (argc != 7) {
 		usage(argv[0]);
 	}
@@ -43,18 +52,19 @@ int main(int argc, char *argv[])
 	const int intervaloMusic  = atoi(argv[4]);
 	const int intervaloSocial = atoi(argv[5]);
 	const int dadosReservar   = atoi(argv[6]);
+	const pid_t userID       = getpid();
 
 	int authorizationRequests = 0;
 	while (true) {
 		if (authorizationRequests > numPedidos) break;
 
-		sendMessage(user_id, ID_VIDEO, dadosReservar);
+		sendMessage(userID, ID_VIDEO, dadosReservar);
 		authorizationRequests++;
 
-		sendMessage(user_id, ID_MUSIC, dadosReservar);
+		sendMessage(userID, ID_MUSIC, dadosReservar);
 		authorizationRequests++;
 
-		sendMessage(user_id, ID_SOCIAL, dadosReservar);
+		sendMessage(userID, ID_SOCIAL, dadosReservar);
 		authorizationRequests++;
 	}
 

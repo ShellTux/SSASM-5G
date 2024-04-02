@@ -24,9 +24,9 @@
  *
  ***************************************************************************/
 
-#define ID_VIDEO  VIDEO
-#define ID_MUSIC  MUSIC
-#define ID_SOCIAL SOCIAL
+#define ID_VIDEO  "VIDEO"
+#define ID_MUSIC  "MUSIC"
+#define ID_SOCIAL "SOCIAL"
 
 void usage(const char *const programName);
 void sendMessage(const int userID,
