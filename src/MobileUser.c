@@ -78,6 +78,9 @@ void usage(const char *const programName)
 	        "<intervalo_video> <intervalo_music> <intervalo_social> "
 	        "<dados_reservar>\n",
 	        programName);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr,
+	        "  -h, --help                   Print this usage message\n");
 	exit(EXIT_FAILURE);
 }
 
