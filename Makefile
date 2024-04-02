@@ -4,7 +4,7 @@ ARCHIVE     = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
 INCLUDE_DIR = $(PWD)/include
 OBJ_DIR     = obj
 SRC_DIR     = src
-TARGETS     = 5g_auth_platform
+TARGETS     = 5g_auth_platform mobile_user backoffice_user
 
 HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
@@ -37,6 +37,12 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 
 SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+
+SOURCES = BackOfficeUser
+backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+
+SOURCES = MobileUser
+mobile_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): %:
 	$(CC) $(CFLAGS) -o $@ $^
