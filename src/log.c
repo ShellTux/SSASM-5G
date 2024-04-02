@@ -43,6 +43,7 @@ void logMessage(const char *const format, ...)
 	strftime(timestamp, MAX_SIZE, TIME_FORMAT, timeinfo);
 #undef MAX_SIZE
 
+	// TODO(ShellTux): Add semaphores blocks before writting
 
 	va_list args;
 
