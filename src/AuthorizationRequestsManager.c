@@ -25,6 +25,8 @@
 
 #include "log.h"
 
+#include <bits/pthreadtypes.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/shm.h>
@@ -32,7 +34,20 @@
 
 void authorizationRequestsManager(const int sharedMemoryID)
 {
+	// NOLINTNEXTLINE
+#define receiver 0
+	// NOLINTNEXTLINE
+#define sender   1
+
 	logMessage(LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
+
+	pthread_t threads[2];
+
+	pthread_create(&threads[receiver], NULL, receiverThread, NULL);
+	pthread_create(&threads[sender], NULL, senderThread, NULL);
+
+	pthread_join(threads[receiver], NULL);
+	pthread_join(threads[sender], NULL);
 
 	sleep(1);
 
@@ -50,4 +65,21 @@ void authorizationRequestsManager(const int sharedMemoryID)
 	}
 
 	sleep(1);
+
+#undef receiver
+#undef sender
+}
+
+void *receiverThread(void *argument)
+{
+	(void) argument;
+	logMessage(LOG_THREAD_CREATED(RECEIVER));
+	pthread_exit(NULL);
+}
+
+void *senderThread(void *argument)
+{
+	(void) argument;
+	logMessage(LOG_THREAD_CREATED(SENDER));
+	pthread_exit(NULL);
 }

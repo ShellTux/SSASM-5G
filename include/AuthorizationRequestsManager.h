@@ -27,6 +27,10 @@
 #define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
 	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
 
+#define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
+
 void authorizationRequestsManager(const int sharedMemoryID);
+void *receiverThread(void *argument);
+void *senderThread(void *argument);
 
 #endif // !AUTHORIZATION_REQUESTS_MANAGER_H

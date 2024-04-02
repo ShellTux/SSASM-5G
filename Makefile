@@ -18,6 +18,7 @@ CFLAGS += -Wno-error=unused-variable
 CFLAGS += -Wno-error=unused-but-set-variable
 CFLAGS += -fdiagnostics-color=always
 CFLAGS += -I$(INCLUDE_DIR)
+CFLAGS += -pthread
 LINKS   =
 
 all: $(TARGETS)
