@@ -50,7 +50,6 @@ $(OBJ_DIR)/%.md: %.md
 	mkdir --parents `dirname "$@"`
 	cp $< $@
 	sed -i 's|/assets|assets|g' $@
-	sed -i 's|date: date|date: '$(shell date +'%d/%m/%Y')'|' $@
 
 relatorio.pdf: $(OBJ_DIR)/docs/relatorio.md
 	pandoc --standalone --resource-path=assets --output $@ $<
