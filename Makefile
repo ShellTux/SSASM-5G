@@ -46,13 +46,13 @@ $(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target
 $(TARGETS): %:
 	$(CC) $(CFLAGS) -o $@ $^
 
-$(OBJ_DIR)/%.md: %.md
-	mkdir --parents `dirname "$@"`
-	cp $< $@
-	sed -i 's|/assets|assets|g' $@
-
-relatorio.pdf: $(OBJ_DIR)/docs/relatorio.md
-	pandoc --standalone --resource-path=assets --output $@ $<
+relatorio.pdf: docs/relatorio.md
+	sed 's|/assets|assets|g' $< \
+		| pandoc \
+		--standalone \
+		--from=markdown \
+		--resource-path=assets \
+		--output $@
 
 archive: $(ARCHIVE)
 
