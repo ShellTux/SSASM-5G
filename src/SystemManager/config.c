@@ -63,3 +63,42 @@ bool isValidSystemManagerConfigFile(const char *const configFilepath)
 
 	return isValid && lineCount == CONFIG_FILE_N_LINES;
 }
+
+SystemManagerConfig systemManagerConfigFromFile(const char *const filepath)
+{
+	SystemManagerConfig config = {0};
+
+	FILE *configFile = fopen(filepath, "r");
+	if (configFile == NULL) {
+		fprintf(stderr, "Error opening file: \"%s\"\n", filepath);
+		exit(EXIT_FAILURE);
+	}
+
+	char line[100];
+	int lineCount = 0;
+	while (fgets(line, sizeof(line), configFile) != NULL) {
+		trim(line);
+		// BUG: atoi is vulnerable to exploits
+		config.optionsArray[lineCount++] = atoi(line);
+
+		if (lineCount > CONFIG_FILE_N_LINES) {
+			break;
+		}
+	}
+
+	fclose(configFile);
+
+	return config;
+}
+
+void printSystemManagerConfig(FILE *file, const SystemManagerConfig config)
+{
+	fprintf(file,
+	        SYSTEM_MANAGER_CONFIG_FORMAT,
+	        config.options.mobileUsers,
+	        config.options.queuePos,
+	        config.options.authServersMax,
+	        config.options.authProcTime,
+	        config.options.maxVideoWait,
+	        config.options.maxOthersWait);
+}
