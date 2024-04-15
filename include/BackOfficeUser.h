@@ -24,8 +24,8 @@
  *
  ***************************************************************************/
 
-#define SIGINT_MESSAGE "Received SIGINT. Exiting...\n"
-#define COMMAND_MAX 50
+#define SIGINT_MESSAGE  "Received SIGINT. Exiting...\n"
+#define COMMAND_MAX     50
 #define INVALID_COMMAND "Invalid command. Use data_stats or reset.\n"
 
 void sendMessage(const int userID,
