@@ -20,7 +20,7 @@ n="$1"
 
 for _ in $(seq 1 "$n")
 do
-	plafond_inicial="$(seq 1 100 | sort --random-sort | head -1)"
+	plafond_inicial="$(seq 100 1000 | sort --random-sort | head -1)"
 	max_authorization_requests="$(seq 1 100 | sort --random-sort | head -1)"
 	video_interval="$(seq 1 100 | sort --random-sort | head -1)"
 	music_interval="$(seq 1 100 | sort --random-sort | head -1)"
