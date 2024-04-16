@@ -24,13 +24,50 @@
  *
  ***************************************************************************/
 
-#define SIGINT_MESSAGE  "Received SIGINT. Exiting...\n"
-#define COMMAND_MAX     50
-#define INVALID_COMMAND "Invalid command. Use data_stats or reset.\n"
+#include <stddef.h>
+
+#define AUTHORIZATION_REQUEST_MANAGER_PIPE "BACK_PIPE"
+#define COMMAND_MAX                        50
+#define COMMAND_DELIMITER                  "# \n"
+#define INVALID_COMMAND_STRING                       \
+	"Invalid command. Available commands are:\n" \
+	"\t- data_stats\n"                           \
+	"\t- reset\n"
+#define PROMPT         "> "
+#define SIGINT_MESSAGE "Received SIGINT. Exiting...\n"
+
+#define COMMANDS                                                              \
+	WRAPPER(DATA_STATS_COMMAND,                                           \
+	        dataStatsCommand,                                             \
+	        data_stats,                                                   \
+	        "Presents statistics regarding data consumption"              \
+	        "in the various services: total reserved data and number of " \
+	        "authorization renewal requests;")                            \
+	WRAPPER(RESET_COMMAND,                                                \
+	        resetCommand,                                                 \
+	        reset,                                                        \
+	        "Clears related statistics calculated so far by the system.")
+
+typedef struct {
+	size_t id;
+	enum {
+		INVALID_COMMAND,
+#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) ENUM,
+		COMMANDS
+#undef WRAPPER
+	} command;
+} Command;
+
+#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	void FUNCTION(const size_t id);
+COMMANDS
+#undef WRAPPER
+void invalidCommand(void);
 
 void sendMessage(const int userID,
                  const char *const serviceID,
                  const int dataReservation);
 void sigintHandler(const int signal);
+Command processCommand(char *const string);
 
 #endif // !BACK_OFFICE_USER_H

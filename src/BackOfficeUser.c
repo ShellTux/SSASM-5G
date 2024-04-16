@@ -33,30 +33,24 @@ int main()
 {
 	signal(SIGINT, sigintHandler);
 
-	bool dataStats  = false;
-	bool resetStats = false;
-
 	while (true) {
-		char command[COMMAND_MAX + 1];
-		scanf("%s", command);
+		printf(PROMPT);
 
-		if (strncmp(command, "data_stats", COMMAND_MAX) == 0) {
-			dataStats = true;
-		} else if (strncmp(command, "reset", COMMAND_MAX) == 0) {
-			resetStats = true;
-		} else {
-			printf(INVALID_COMMAND);
-			continue;
-		}
+		char commandString[COMMAND_MAX + 1] = {0};
+		scanf("%s", commandString);
 
-		if (dataStats) {
-			printf("Service\t\tTotal Data\tAuth Reqs\n");
-			dataStats = false;
-		}
-
-		if (resetStats) {
-			printf("Statistics cleared.\n");
-			resetStats = false;
+		const Command command = processCommand(commandString);
+		switch (command.command) {
+#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	case ENUM:                                    \
+		FUNCTION(command.id);                 \
+		break;
+			COMMANDS
+#undef WRAPPER
+		case INVALID_COMMAND:
+		default:
+			invalidCommand();
+			break;
 		}
 	}
 
@@ -68,4 +62,56 @@ void sigintHandler(const int signal)
 	(void) signal;
 	printf(SIGINT_MESSAGE);
 	exit(EXIT_SUCCESS);
+}
+
+Command processCommand(char *const string)
+{
+	static const Command invalidCommand = {
+	    .id      = 0,
+	    .command = INVALID_COMMAND,
+	};
+
+	Command command = invalidCommand;
+
+	// NOTE: strtok is not thread safe
+	char *token = strtok(string, COMMAND_DELIMITER);
+	if (token == NULL) {
+		return invalidCommand;
+	}
+
+	command.id = atoi(token);
+
+	token = strtok(NULL, COMMAND_DELIMITER);
+	if (token == NULL) {
+		return invalidCommand;
+	}
+#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
+	else if (strncmp(token, #COMMAND, COMMAND_MAX) == 0) \
+	{                                                    \
+		command.command = ENUM;                      \
+		return command;                              \
+	}
+	COMMANDS
+#undef WRAPPER
+
+	return invalidCommand;
+}
+
+void invalidCommand(void)
+{
+	printf("Invalid Command. Available commands are:\n");
+#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	printf("  - %s: %s\n", #COMMAND, DESCRIPTION);
+	COMMANDS
+#undef WRAPPER
+}
+
+void dataStatsCommand(const size_t id)
+{
+	printf("data stats: %zu\n", id);
+}
+
+void resetCommand(const size_t id)
+{
+	printf("reset: %zu\n", id);
 }
