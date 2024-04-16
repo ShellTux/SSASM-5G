@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
+#include <sys/param.h>
 #include <unistd.h>
 
 
@@ -46,26 +48,21 @@ int main(int argc, char *argv[])
 
 	signal(SIGINT, sigintHandler);
 
-	const int plafondInicial  = atoi(argv[1]);
-	const int numPedidos      = atoi(argv[2]);
-	const int intervaloVideo  = atoi(argv[3]);
-	const int intervaloMusic  = atoi(argv[4]);
-	const int intervaloSocial = atoi(argv[5]);
-	const int dadosReservar   = atoi(argv[6]);
-	const pid_t userID        = getpid();
+	MobileUser mobileUser = createMobileUserFromArgs(argv + 1, argc - 1);
 
-	int authorizationRequests = 0;
+	size_t authorizationRequests = 0;
 	while (true) {
-		if (authorizationRequests > numPedidos) break;
+		if (authorizationRequests > mobileUser.options.numPedidos) {
+			break;
+		}
 
-		sendMessage(userID, VIDEO, dadosReservar);
-		authorizationRequests++;
-
-		sendMessage(userID, MUSIC, dadosReservar);
-		authorizationRequests++;
-
-		sendMessage(userID, SOCIAL, dadosReservar);
-		authorizationRequests++;
+#define WRAPPER(ENUM)                                 \
+	sendMessage(mobileUser.options.userID,        \
+	            ENUM,                             \
+	            mobileUser.options.reservedData); \
+	authorizationRequests++;
+		SERVICES
+#undef WRAPPER
 	}
 
 	return EXIT_SUCCESS;
@@ -113,4 +110,30 @@ const char *serviceString(const Service service)
 	}
 
 	return NULL;
+}
+
+MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
+{
+	MobileUser mobileUser;
+
+	const int N = MIN(argumentsLength, MOBILE_USER_OPTIONS_NUM);
+	for (int i = 0; i < N; ++i) {
+		const char *const argument = arguments[i];
+
+		mobileUser.arrayOptions[i] = atoi(argument);
+	}
+
+	mobileUser.options.processID = getpid();
+
+	static const MobileUser invalidMobileUser = {
+	    .arrayOptions = {0},
+	};
+
+	return isMobileUserValid(mobileUser) ? mobileUser : invalidMobileUser;
+}
+
+bool isMobileUserValid(const MobileUser mobileUser)
+{
+	(void) mobileUser;
+	return true;
 }
