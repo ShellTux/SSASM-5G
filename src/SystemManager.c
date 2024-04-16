@@ -57,13 +57,18 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	const SystemManagerConfig systemManagerConfig
+	    = systemManagerConfigFromFile(configFilepath);
+	printSystemManagerConfig(stdout, systemManagerConfig);
+
 	logMessage(LOG_SIMULATOR_START);
 
 	logMessage(LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
 	int shmid;
 	if ((shmid = shmget(SHARED_MEMORY_KEY,
-	                    SHARED_MEMORY_SIZE,
+	                    sizeof(MobileUser)
+	                        * systemManagerConfig.options.mobileUsers,
 	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
 	    < 0) {
 		perror("IPC error: shmget");
@@ -95,8 +100,8 @@ int main(int argc, char **argv)
 	}
 #undef N_FORKS
 
-	char *sharedMemory;
-	if ((sharedMemory = shmat(shmid, NULL, 0)) == (char *) -1) {
+	MobileUser *sharedMemory = NULL;
+	if ((sharedMemory = shmat(shmid, NULL, 0)) == (MobileUser *) -1) {
 		perror("IPC error: shmat");
 		exit(EXIT_FAILURE);
 	}
