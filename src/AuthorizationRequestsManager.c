@@ -26,10 +26,14 @@
 #include "log.h"
 
 #include <bits/pthreadtypes.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 void authorizationRequestsManager(const int sharedMemoryID)
@@ -40,6 +44,16 @@ void authorizationRequestsManager(const int sharedMemoryID)
 #define sender   1
 
 	logMessage(LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
+
+	if (mkfifo(USER_PIPE, O_CREAT | O_EXCL | USER_PIPE_PERMISSIONS) < 0
+	    && (errno != EEXIST)) {
+		perror("mkfifo: ");
+	}
+
+	if (mkfifo(BACK_PIPE, O_CREAT | O_EXCL | BACK_PIPE_PERMISSIONS) < 0
+	    && (errno != EEXIST)) {
+		perror("mkfifo: ");
+	}
 
 	pthread_t threads[2];
 
@@ -68,6 +82,8 @@ void authorizationRequestsManager(const int sharedMemoryID)
 
 #undef receiver
 #undef sender
+	unlink(USER_PIPE);
+	unlink(BACK_PIPE);
 }
 
 void *receiverThread(void *argument)
