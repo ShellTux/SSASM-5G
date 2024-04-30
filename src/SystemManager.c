@@ -24,10 +24,13 @@
 #include "SystemManager.h"
 
 #include "AuthorizationRequestsManager.h"
+#include "MobileUser.h"
 #include "MonitorEngine.h"
 #include "SystemManager/config.h"
 #include "log.h"
+#include "utils/fork.h"
 
+#include <sched.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,30 +78,8 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-#define N_FORKS 2
-	pid_t pids[N_FORKS];
-	for (int i = 0; i < N_FORKS; ++i) {
-		pids[i] = fork();
-
-		if (pids[i] == 0) {
-			switch (i) {
-			case 0:
-				authorizationRequestsManager(shmid);
-				break;
-			case 1:
-				monitorEngine();
-				break;
-			}
-
-			exit(EXIT_SUCCESS);
-		} else if (pids[i] < 0) {
-			perror("Fork Failed\n");
-			// TODO: Other successful process forks might become
-			// orphan
-			exit(EXIT_FAILURE);
-		}
-	}
-#undef N_FORKS
+	FORK_FUNCTION(authorizationRequestsManager, shmid);
+	FORK_FUNCTION(monitorEngine);
 
 	MobileUser *sharedMemory = NULL;
 	if ((sharedMemory = shmat(shmid, NULL, 0)) == (MobileUser *) -1) {
