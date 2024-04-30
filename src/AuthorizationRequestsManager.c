@@ -38,11 +38,6 @@
 
 void authorizationRequestsManager(const int sharedMemoryID)
 {
-	// NOLINTNEXTLINE
-#define receiver 0
-	// NOLINTNEXTLINE
-#define sender   1
-
 	logMessage(LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
 
 	if (mkfifo(USER_PIPE, O_CREAT | O_EXCL | USER_PIPE_PERMISSIONS) < 0
@@ -57,11 +52,17 @@ void authorizationRequestsManager(const int sharedMemoryID)
 
 	pthread_t threads[2];
 
+	// NOLINTNEXTLINE
+#define receiver 0
+	// NOLINTNEXTLINE
+#define sender   1
 	pthread_create(&threads[receiver], NULL, receiverThread, NULL);
 	pthread_create(&threads[sender], NULL, senderThread, NULL);
 
 	pthread_join(threads[receiver], NULL);
 	pthread_join(threads[sender], NULL);
+#undef receiver
+#undef sender
 
 	sleep(1);
 
@@ -80,8 +81,6 @@ void authorizationRequestsManager(const int sharedMemoryID)
 
 	sleep(1);
 
-#undef receiver
-#undef sender
 	unlink(USER_PIPE);
 	unlink(BACK_PIPE);
 }
