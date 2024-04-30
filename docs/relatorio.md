@@ -11,7 +11,7 @@ date: \today
 
 Para proteger o acesso aos recursos compartilhados, como a shared memory,
 LogFile e as queues, devemos implementar mecanismos de sincronização, tais como
-semáforos e mutexes. 
+semáforos e mutexes.
 
 Optou-se pela utilização de semáforos para controlar o acesso ao LogFile e à
 Message Queue,uma vez que permitem múltiplas threads ou processos acessem um

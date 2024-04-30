@@ -16,14 +16,14 @@ Neste projeto simula-se um sistema de autorização em tempo real onde vários u
 
 ![Arquitetura técnica do simulador](assets/technical-architecture-of-the-simulator.png)
 
-O sistema é baseado nos seguintes processos e threads: 
+O sistema é baseado nos seguintes processos e threads:
 
 - `Mobile User` - Processo que simula o utilizador móvel e gera pedidos de serviço de dados (redes sociais, vídeo ou música) utilizando um named pipe comum (USER_PIPE) para comunicar com o Authorization Requests Manager. É também responsável pela receção de alertas relacionados com os consumos dos vários serviços (via Message Queue). Podem existir vários destes processos.
 - `BackOffice User` - Processo que gere informação agregada da utilização dos serviços pelos utilizadores. Recebe periodicamente estatísticas agregadas de utilização dos serviços (via Message Queue), ou pode também solicitar estatísticas de forma assíncrona ao Authorization Requests Manager utilizando um named pipe (BACK_PIPE). Existe, no máximo, apenas um destes processos.
 - `System Manager` - Processo responsável por iniciar o sistema, ler o ficheiro de configuração, criar a Shared Memory, criar a Message Queue, e criar os processos `Authorization Requests Manager` e Monitor Engine`.
 - `Authorization Requests Manager` - Processo responsável por gerir a receção de pedidos do `Mobile User` e do `BackOffice User`, encaminhar os mesmos para a respetiva fila interna (Video Streaming Queue, Other Services Queue) e a sua distribuição pelos processos Authorization Engine de acordo com as prioridades definidas. Responsável pela criação dos processos Authorization Engine, de acordo com a taxa de ocupação das filas. É também responsável pela criação dos named pipes.
 - `Authorization Engine` - Processo responsável por executar pedidos de autorização de serviço. Sempre que recebe um pedido de autorização de serviço, deve verificar se o utilizador tem plafond disponível para prosseguir com o mesmo e fazer a sua contabilização na Shared Memory. É também responsável por responder à solicitação de estatísticas do BackOffice User. Podem existir vários destes processos.
-- `Monitor Engine` - Processo responsável por gerar alertas se os valores dos consumos de cada utilizador atingem os limites definidos pelo sistema (80%, 90%, 100%). Se for este o caso, então deve alertar os mesmos através da Message Queue. É também responsável por enviar as estatísticas periódicas agregadas para o BackOffice User. 
+- `Monitor Engine` - Processo responsável por gerar alertas se os valores dos consumos de cada utilizador atingem os limites definidos pelo sistema (80%, 90%, 100%). Se for este o caso, então deve alertar os mesmos através da Message Queue. É também responsável por enviar as estatísticas periódicas agregadas para o BackOffice User.
 - `Receiver` - Thread que lê os comandos do Mobile User e do BackOffice User enviados através dos named pipes.
 - `Sender` - Thread que lê os pedidos que estão armazenados nas filas (Video Streaming Queue, Other Services Queue) e envia os mesmos através de unnamed pipes para um Authorization Engine que esteja disponível. Os pedidos de autorização na fila Video Streaming Queue têm prioridade sobre os pedidos na fila Other Services Queue
 
@@ -31,7 +31,7 @@ Para além dos processos e threads descritos acima, o sistema é também constit
 
 - `Named Pipe` - Permite que os Mobile Users (USER_PIPE) e o BackOffice User (BACK_PIPE) enviem dados ao processo Authorization Requests Manager.
 - `SHM` - Zona de memória partilhada acedida pelos processos System Manager, Authorization Engine, Authorization Request Manager e Monitor Engine.
-- `Unnamed pipes` - Permitem a comunicação entre o processo Authorization Requests Manager e cada um dos processos Authorization Engine. 
+- `Unnamed pipes` - Permitem a comunicação entre o processo Authorization Requests Manager e cada um dos processos Authorization Engine.
 - `Message Queue` (fila de mensagens) - Permite o envio (pelo Authorization Engine) da resposta aos pedidos de autorização dos Mobile Users, bem como o envio de estatísticas agregadas solicitadas pelo BackOffice User. Permite também o envio de alertas a partir do Monitor Engine para os Mobile Users.
 
 Dentro do processo Authorization Requests Manager existem duas estruturas de
@@ -61,15 +61,15 @@ O plafond inicial, o número de pedidos de autorização a enviar, os intervalos
 Sintaxe do comando de inicialização do processo Mobile User:
 
 ```sh
-$ mobile_user / 
-{plafond inicial} / 
-{número de pedidos de autorização} / 
-{intervalo VIDEO} {intervalo MUSIC} {intervalo SOCIAL} / 
+$ mobile_user /
+{plafond inicial} /
+{número de pedidos de autorização} /
+{intervalo VIDEO} {intervalo MUSIC} {intervalo SOCIAL} /
 {dados a reservar}
 ```
 
 exemplo:
 
 ```sh
-$ mobile_user 800 50 10 20 5 40 
+$ mobile_user 800 50 10 20 5 40
 ```
