@@ -41,8 +41,7 @@ typedef enum {
 
 const char *serviceString(const Service service);
 
-#define AUTHORIZATION_MESSAGE_FORMAT             "%d#%s#%d"
-#define AUTHORIZATION_REQUEST_MANAGER_NAMED_PIPE "USER_PIPE"
+#define AUTHORIZATION_MESSAGE_FORMAT "%d#%s#%d"
 
 #define MOBILE_USER_OPTIONS_NUM 6
 typedef union {

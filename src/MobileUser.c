@@ -23,6 +23,10 @@
 
 #include "MobileUser.h"
 
+#include "AuthorizationRequestsManager.h"
+#include "utils/error.h"
+
+#include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -32,6 +36,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+int userPipeFD;
 
 int main(int argc, char *argv[])
 {
@@ -44,6 +49,10 @@ int main(int argc, char *argv[])
 
 	if (argc != 7) {
 		usage(argv[0]);
+	}
+
+	if ((userPipeFD = open(USER_PIPE, O_WRONLY)) < 0) {
+		HANDLE_ERROR("open: ");
 	}
 
 	signal(SIGINT, sigintHandler);
@@ -92,10 +101,13 @@ void sendMessage(const int userID,
                  const Service service,
                  const int dataReservation)
 {
-	printf(AUTHORIZATION_MESSAGE_FORMAT "\n",
-	       userID,
-	       serviceString(service),
-	       dataReservation);
+	char buffer[1025] = {0};
+	sprintf(buffer,
+	        AUTHORIZATION_MESSAGE_FORMAT,
+	        userID,
+	        serviceString(service),
+	        dataReservation);
+	write(userPipeFD, buffer, sizeof(buffer));
 }
 
 const char *serviceString(const Service service)
