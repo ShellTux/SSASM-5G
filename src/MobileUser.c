@@ -23,6 +23,7 @@
 
 #include "MobileUser.h"
 
+#include "AuthorizationRequest.h"
 #include "AuthorizationRequestsManager.h"
 #include "utils/error.h"
 
@@ -65,10 +66,12 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-#define WRAPPER(ENUM)                                 \
-	sendMessage(mobileUser.options.userID,        \
-	            ENUM,                             \
-	            mobileUser.options.reservedData); \
+#define WRAPPER(ENUM)                                         \
+	sendMessage((AuthorizationRequest){                   \
+	    .mobileUserID  = mobileUser.options.userID,       \
+	    .reservingData = mobileUser.options.reservedData, \
+	    .service       = ENUM,                            \
+	});                                                   \
 	authorizationRequests++;
 		SERVICES
 #undef WRAPPER
@@ -97,31 +100,15 @@ void sigintHandler(const int signal)
 	exit(EXIT_SUCCESS);
 }
 
-void sendMessage(const int userID,
-                 const Service service,
-                 const int dataReservation)
+void sendMessage(const AuthorizationRequest request)
 {
 	char buffer[1025] = {0};
 	sprintf(buffer,
-	        AUTHORIZATION_MESSAGE_FORMAT,
-	        userID,
-	        serviceString(service),
-	        dataReservation);
+	        AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND,
+	        request.mobileUserID,
+	        serviceString(request.service),
+	        request.reservingData);
 	write(userPipeFD, buffer, sizeof(buffer));
-}
-
-const char *serviceString(const Service service)
-{
-	switch (service) {
-#define WRAPPER(ENUM)         \
-	case ENUM: {          \
-		return #ENUM; \
-	};
-		SERVICES
-#undef WRAPPER
-	}
-
-	return NULL;
 }
 
 MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
@@ -148,4 +135,17 @@ bool isMobileUserValid(const MobileUser mobileUser)
 {
 	(void) mobileUser;
 	return true;
+}
+
+void printMobileUser(FILE *file, const MobileUser mobileUser)
+{
+	fprintf(file,
+	        MOBILE_USER_PRINT_FORMAT "\n",
+	        mobileUser.options.plafondInicial,
+	        mobileUser.options.numPedidos,
+	        mobileUser.options.intervalVideo,
+	        mobileUser.options.intervalMusic,
+	        mobileUser.options.intervalSocial,
+	        mobileUser.options.reservedData,
+	        mobileUser.options.userID);
 }

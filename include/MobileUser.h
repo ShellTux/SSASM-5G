@@ -24,26 +24,24 @@
  *
  ***************************************************************************/
 
+#include "AuthorizationRequest.h"
+
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
-
-#define SERVICES       \
-	WRAPPER(VIDEO) \
-	WRAPPER(MUSIC) \
-	WRAPPER(SOCIAL)
-
-typedef enum {
-#define WRAPPER(ENUM) ENUM,
-	SERVICES
-#undef WRAPPER
-} Service;
-
-const char *serviceString(const Service service);
-
-#define AUTHORIZATION_MESSAGE_FORMAT "%d#%s#%d"
+#include <stdio.h>
 
 #define MOBILE_USER_OPTIONS_NUM 6
+#define MOBILE_USER_PRINT_FORMAT  \
+	"{\n"                     \
+	"  plafondInicial: %zu\n" \
+	"  numPedidos: %zu\n"     \
+	"  intervalVideo: %zu\n"  \
+	"  intervalMusic: %zu\n"  \
+	"  intervalSocial: %zu\n" \
+	"  reservedData: %zu\n"   \
+	"  userID: %zu\n"         \
+	"}"
 typedef union {
 	struct {
 		size_t plafondInicial;
@@ -63,10 +61,9 @@ typedef union {
 bool isMobileUserValid(const MobileUser mobileUser);
 MobileUser createMobileUserFromArgs(char **arguments,
                                     const int argumentsLength);
+void printMobileUser(FILE *file, const MobileUser mobileUser);
 void usage(const char *const programName);
-void sendMessage(const int userID,
-                 const Service service,
-                 const int dataReservation);
+void sendMessage(const AuthorizationRequest request);
 void sigintHandler(const int signal);
 
 #endif // !MOBILE_USER_H
