@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #define MOBILE_USER_OPTIONS_NUM 6
 #define MOBILE_USER_PRINT_FORMAT  \
@@ -60,6 +61,7 @@ typedef union {
 bool isMobileUserValid(const MobileUser mobileUser);
 MobileUser createMobileUserFromArgs(char **arguments,
                                     const int argumentsLength);
+void printMobileUser(FILE *file, const MobileUser mobileUser);
 void usage(const char *const programName);
 void sendMessage(const AuthorizationRequest request);
 void sigintHandler(const int signal);

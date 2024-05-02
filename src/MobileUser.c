@@ -136,3 +136,16 @@ bool isMobileUserValid(const MobileUser mobileUser)
 	(void) mobileUser;
 	return true;
 }
+
+void printMobileUser(FILE *file, const MobileUser mobileUser)
+{
+	fprintf(file,
+	        MOBILE_USER_PRINT_FORMAT "\n",
+	        mobileUser.options.plafondInicial,
+	        mobileUser.options.numPedidos,
+	        mobileUser.options.intervalVideo,
+	        mobileUser.options.intervalMusic,
+	        mobileUser.options.intervalSocial,
+	        mobileUser.options.reservedData,
+	        mobileUser.options.userID);
+}
