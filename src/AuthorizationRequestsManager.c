@@ -23,7 +23,9 @@
 
 #include "AuthorizationRequestsManager.h"
 
+#include "AuthorizationRequest.h"
 #include "log.h"
+#include "utils/error.h"
 
 #include <bits/pthreadtypes.h>
 #include <errno.h>
@@ -89,6 +91,18 @@ void *receiverThread(void *argument)
 {
 	(void) argument;
 	logMessage(LOG_THREAD_CREATED(RECEIVER));
+
+	int userPipeFD;
+	if ((userPipeFD = open(USER_PIPE, O_RDONLY)) < 0) {
+		HANDLE_ERROR("open: ");
+	}
+
+	char buffer[4097] = {0};
+	read(userPipeFD, buffer, 4096);
+	AuthorizationRequest request
+	    = createAuthorizationRequestFromString(buffer);
+	printAuthorizationRequest(stdout, request);
+
 	pthread_exit(NULL);
 }
 
