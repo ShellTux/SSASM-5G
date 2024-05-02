@@ -23,6 +23,7 @@
 
 #include "MobileUser.h"
 
+#include "AuthorizationRequest.h"
 #include "AuthorizationRequestsManager.h"
 #include "utils/error.h"
 
@@ -103,25 +104,11 @@ void sendMessage(const int userID,
 {
 	char buffer[1025] = {0};
 	sprintf(buffer,
-	        AUTHORIZATION_MESSAGE_FORMAT,
+	        AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND,
 	        userID,
 	        serviceString(service),
 	        dataReservation);
 	write(userPipeFD, buffer, sizeof(buffer));
-}
-
-const char *serviceString(const Service service)
-{
-	switch (service) {
-#define WRAPPER(ENUM)         \
-	case ENUM: {          \
-		return #ENUM; \
-	};
-		SERVICES
-#undef WRAPPER
-	}
-
-	return NULL;
 }
 
 MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)

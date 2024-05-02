@@ -24,26 +24,23 @@
  *
  ***************************************************************************/
 
+#include "AuthorizationRequest.h"
+
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-#define SERVICES       \
-	WRAPPER(VIDEO) \
-	WRAPPER(MUSIC) \
-	WRAPPER(SOCIAL)
-
-typedef enum {
-#define WRAPPER(ENUM) ENUM,
-	SERVICES
-#undef WRAPPER
-} Service;
-
-const char *serviceString(const Service service);
-
-#define AUTHORIZATION_MESSAGE_FORMAT "%d#%s#%d"
-
 #define MOBILE_USER_OPTIONS_NUM 6
+#define MOBILE_USER_PRINT_FORMAT  \
+	"{\n"                     \
+	"  plafondInicial: %zu\n" \
+	"  numPedidos: %zu\n"     \
+	"  intervalVideo: %zu\n"  \
+	"  intervalMusic: %zu\n"  \
+	"  intervalSocial: %zu\n" \
+	"  reservedData: %zu\n"   \
+	"  userID: %zu\n"         \
+	"}"
 typedef union {
 	struct {
 		size_t plafondInicial;
