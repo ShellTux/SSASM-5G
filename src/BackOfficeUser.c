@@ -37,7 +37,9 @@ int main()
 		printf(PROMPT);
 
 		char commandString[COMMAND_MAX + 1] = {0};
-		scanf("%s", commandString);
+		if (scanf(" %[^\n]%*c", commandString) == EOF) {
+			break;
+		}
 
 		const Command command = processCommand(commandString);
 		switch (command.command) {
