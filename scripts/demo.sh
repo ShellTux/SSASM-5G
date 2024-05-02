@@ -27,6 +27,8 @@ do
 	social_interval="$(seq 1 100 | sort --random-sort | head -1)"
 	reserved_data="$(seq 1 100 | sort --random-sort | head -1)"
 
+	(
+	set -xe
 	./mobile_user \
 		"$plafond_inicial" \
 		"$max_authorization_requests" \
@@ -34,6 +36,7 @@ do
 		"$music_interval" \
 		"$social_interval" \
 		"$reserved_data"
+	)
 done
 
 ./backoffice_user
