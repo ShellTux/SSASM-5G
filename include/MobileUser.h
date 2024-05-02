@@ -61,9 +61,7 @@ bool isMobileUserValid(const MobileUser mobileUser);
 MobileUser createMobileUserFromArgs(char **arguments,
                                     const int argumentsLength);
 void usage(const char *const programName);
-void sendMessage(const int userID,
-                 const Service service,
-                 const int dataReservation);
+void sendMessage(const AuthorizationRequest request);
 void sigintHandler(const int signal);
 
 #endif // !MOBILE_USER_H

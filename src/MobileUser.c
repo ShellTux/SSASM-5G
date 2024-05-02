@@ -66,10 +66,12 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-#define WRAPPER(ENUM)                                 \
-	sendMessage(mobileUser.options.userID,        \
-	            ENUM,                             \
-	            mobileUser.options.reservedData); \
+#define WRAPPER(ENUM)                                         \
+	sendMessage((AuthorizationRequest){                   \
+	    .mobileUserID  = mobileUser.options.userID,       \
+	    .reservingData = mobileUser.options.reservedData, \
+	    .service       = ENUM,                            \
+	});                                                   \
 	authorizationRequests++;
 		SERVICES
 #undef WRAPPER
@@ -98,16 +100,14 @@ void sigintHandler(const int signal)
 	exit(EXIT_SUCCESS);
 }
 
-void sendMessage(const int userID,
-                 const Service service,
-                 const int dataReservation)
+void sendMessage(const AuthorizationRequest request)
 {
 	char buffer[1025] = {0};
 	sprintf(buffer,
 	        AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND,
-	        userID,
-	        serviceString(service),
-	        dataReservation);
+	        request.mobileUserID,
+	        serviceString(request.service),
+	        request.reservingData);
 	write(userPipeFD, buffer, sizeof(buffer));
 }
 
