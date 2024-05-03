@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "BackOfficeUser.h"
+
 #include "MessageQueue.h"
 
 #include <signal.h>
@@ -30,12 +31,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-int messageQueueID; 
+int messageQueueID;
 
 int main()
-{	
+{
 	signal(SIGINT, sigintHandler);
-	messageQueueID = createMessageQueue(); 
+	messageQueueID = createMessageQueue();
 
 	while (true) {
 		printf(PROMPT);
@@ -113,9 +114,14 @@ void invalidCommand(void)
 }
 
 void dataStatsCommand(const size_t id)
-{	Statistics stats;
-	msgrcv(messageQueueID, &stats, sizeof(stats)- sizeof(long), STATISTICS_MESSAGE , 0); 
-	printStats(stdout, stats); 
+{
+	Statistics stats;
+	msgrcv(messageQueueID,
+	       &stats,
+	       sizeof(stats) - sizeof(long),
+	       STATISTICS_MESSAGE,
+	       0);
+	printStats(stdout, stats);
 }
 
 void resetCommand(const size_t id)
@@ -123,9 +129,26 @@ void resetCommand(const size_t id)
 	printf("reset: %zu\n", id);
 }
 
-void printStats(FILE * file , Statistics stats){
-	fprintf(file, "%-10s %-10s %-10s\n", "SERVICE", "Total Data", "Auth Reqs");
-	fprintf(file, "%-10s %-10zu %-10zu\n", "VIDEO", stats.video.totalData, stats.video.authReqs);
-	fprintf(file, "%-10s %-10zu %-10zu\n", "MUSIC", stats.music.totalData, stats.music.authReqs); 
-	fprintf(file, "%-10s %-10zu %-10zu\n", "SOCIAL", stats.social.totalData, stats.social.authReqs); 
+void printStats(FILE *file, Statistics stats)
+{
+	fprintf(file,
+	        "%-10s %-10s %-10s\n",
+	        "SERVICE",
+	        "Total Data",
+	        "Auth Reqs");
+	fprintf(file,
+	        "%-10s %-10zu %-10zu\n",
+	        "VIDEO",
+	        stats.video.totalData,
+	        stats.video.authReqs);
+	fprintf(file,
+	        "%-10s %-10zu %-10zu\n",
+	        "MUSIC",
+	        stats.music.totalData,
+	        stats.music.authReqs);
+	fprintf(file,
+	        "%-10s %-10zu %-10zu\n",
+	        "SOCIAL",
+	        stats.social.totalData,
+	        stats.social.authReqs);
 }

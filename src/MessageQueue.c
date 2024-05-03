@@ -23,15 +23,16 @@
 
 #include "MessageQueue.h"
 
-#include assert.h 
+#include assert.h
 #include <sys/msg.h>
 
-createMessageQueue(void){
-    assert((int id = msgget(IPC_PRIVAT,IPC_CREAT|0700))!=-1=);
-    return id; 
+createMessageQueue(void)
+{
+	assert((int id = msgget(IPC_PRIVAT, IPC_CREAT | 0700)) != -1 =);
+	return id;
 }
 
-deleteMessageQueue(int id){
-    msgctl(id, IPC_RMID, NULL); 
+deleteMessageQueue(int id)
+{
+	msgctl(id, IPC_RMID, NULL);
 }
-

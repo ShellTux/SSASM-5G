@@ -24,29 +24,27 @@
  *
  ***************************************************************************/
 
-#define MAX_MESSAGE      256
+#define MAX_MESSAGE 256
 
 
-typedef struct
-{
-	size_t totalData; 
+typedef struct {
+	size_t totalData;
 	size_t authReqs;
 } ServiceStats;
 
 
-typedef struct 
-{
-	ServiceStats video; 
-	ServiceStats music; 
+typedef struct {
+	ServiceStats video;
+	ServiceStats music;
 	ServiceStats social;
-	
+
 } Statistics;
 
 
 typedef struct {
 	long messageType;
 
-	Statistics stats; 
+	Statistics stats;
 } Message;
 
 typedef enum {
@@ -55,5 +53,5 @@ typedef enum {
 } MessageType;
 
 int createMessageQueue(void);
-void deleteMessageQueue(int id); 
+void deleteMessageQueue(int id);
 #endif // !MESSAGE_QUEUE_H
