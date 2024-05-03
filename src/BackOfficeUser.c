@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "BackOfficeUser.h"
+#include "MessageQueue.h"
 
 #include <signal.h>
 #include <stdbool.h>
@@ -30,9 +31,10 @@
 #include <string.h>
 
 int main()
-{
+{	
 	signal(SIGINT, sigintHandler);
-
+	createMessageQueue(); 
+	
 	while (true) {
 		printf(PROMPT);
 
@@ -117,3 +119,4 @@ void resetCommand(const size_t id)
 {
 	printf("reset: %zu\n", id);
 }
+

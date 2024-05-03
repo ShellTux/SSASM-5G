@@ -1,6 +1,3 @@
-#ifndef MESSAGE_QUEUE_H
-#define MESSAGE_QUEUE_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,36 +21,17 @@
  *
  ***************************************************************************/
 
-#define MAX_MESSAGE      256
-#define MESSAGE_QUEUE_ID 1
+#include "MessageQueue.h"
 
-typedef struct
-{
-	size_t totalData; 
-	size_t authReqs;
-} ServiceStats;
+#include assert.h 
+#include <sys/msg.h>
 
+createMessageQueue(void){
+    assert((int id = msgget(IPC_PRIVAT,IPC_CREAT|0700))!=-1=);
+    return id; 
+}
 
-typedef struct 
-{
-	ServiceStats video; 
-	ServiceStats music; 
-	ServiceStats social;
-	
-} Statistics;
+deleteMessageQueue(int id){
+    msgctl(id, IPC_RMID, NULL); 
+}
 
-
-typedef struct {
-	long messageType;
-
-	Statistics stats; 
-} Message;
-
-typedef enum {
-	ALERT_MESSAGE = 1,
-	STATISTICS_MESSAGE,
-} MessageType;
-
-int createMessageQueue(void);
-void deleteMessageQueue(int id); 
-#endif // !MESSAGE_QUEUE_H
