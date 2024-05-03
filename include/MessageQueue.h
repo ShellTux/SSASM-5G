@@ -25,7 +25,7 @@
  ***************************************************************************/
 
 #define MAX_MESSAGE      256
-#define MESSAGE_QUEUE_ID 1
+
 
 typedef struct
 {
