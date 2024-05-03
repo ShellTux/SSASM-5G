@@ -24,8 +24,9 @@
  *
  ***************************************************************************/
 
-#define MAX_MESSAGE 256
+#include <stddef.h>
 
+#define MAX_MESSAGE 256
 
 typedef struct {
 	size_t totalData;
@@ -37,7 +38,6 @@ typedef struct {
 	ServiceStats video;
 	ServiceStats music;
 	ServiceStats social;
-
 } Statistics;
 
 
@@ -53,5 +53,5 @@ typedef enum {
 } MessageType;
 
 int createMessageQueue(void);
-void deleteMessageQueue(int id);
+void deleteMessageQueue(const int id);
 #endif // !MESSAGE_QUEUE_H

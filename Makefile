@@ -36,7 +36,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string AuthorizationRequest
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-SOURCES = BackOfficeUser
+SOURCES = BackOfficeUser MessageQueue
 backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 SOURCES = MobileUser AuthorizationRequest
