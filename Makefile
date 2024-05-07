@@ -118,5 +118,5 @@ warning:
 explore:
 	find $(SRC_DIR) $(INCLUDE_DIR) -type f -name "*.[ch]" \
 		| fzf --preview "$(BAT) --color=always --style=numbers {}" \
-		--bind='enter:execute($(BAT) {})' \
+		--bind='enter:execute($(BAT) {})+clear-query' \
 		--preview-window=right:70% || true
