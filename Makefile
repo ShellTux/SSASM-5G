@@ -1,5 +1,5 @@
 ARCHIVE     = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
-INCLUDE_DIR = $(PWD)/include
+INCLUDE_DIR = include
 OBJ_DIR     = obj
 SRC_DIR     = src
 TARGETS     = 5g_auth_platform mobile_user backoffice_user
@@ -15,7 +15,7 @@ CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable
 CFLAGS += -Wno-error=unused-but-set-variable
 CFLAGS += -fdiagnostics-color=always
-CFLAGS += -I$(INCLUDE_DIR)
+CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
 LINKS   =
 
