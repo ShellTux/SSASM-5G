@@ -19,6 +19,12 @@ CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
 LINKS   =
 
+ifneq ($(shell command -v batcat 2>/dev/null),)
+	BAT = batcat
+else
+	BAT = bat
+endif
+
 all: warning $(TARGETS)
 
 debug: CFLAGS += -g -DDEBUG=1
@@ -108,3 +114,9 @@ warning:
 		&& printf '%s\n' 'Please Try compiling by making sure the full path to this Makefile does not contain spaces.' \
 		&& exit 1 \
 		|| true
+
+explore:
+	find $(SRC_DIR) $(INCLUDE_DIR) -type f -name "*.[ch]" \
+		| fzf --preview "$(BAT) --color=always --style=numbers {}" \
+		--bind='enter:execute($(BAT) {})' \
+		--preview-window=right:70% || true
