@@ -24,7 +24,10 @@
  *
  ***************************************************************************/
 
+#include "MessageQueue.h"
+
 #include <stddef.h>
+#include <stdio.h>
 
 #define AUTHORIZATION_REQUEST_MANAGER_PIPE "BACK_PIPE"
 #define COMMAND_MAX                        50
@@ -69,5 +72,7 @@ void sendMessage(const int userID,
                  const int dataReservation);
 void sigintHandler(const int signal);
 Command processCommand(char *const string);
+
+void printStats(FILE *file, Statistics stats);
 
 #endif // !BACK_OFFICE_USER_H
