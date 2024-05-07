@@ -26,6 +26,8 @@
 #include "AuthorizationRequestsManager.h"
 #include "MobileUser.h"
 #include "MonitorEngine.h"
+#include "SystemManager/MessageQueue.h"
+#include "SystemManager/SharedMemory.h"
 #include "SystemManager/config.h"
 #include "log.h"
 #include "utils/fork.h"
@@ -40,6 +42,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+int shmid;
+int msqid;
 
 int main(int argc, char **argv)
 {
@@ -68,37 +73,16 @@ int main(int argc, char **argv)
 
 	logMessage(LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
-	int shmid;
-	if ((shmid = shmget(SHARED_MEMORY_KEY,
-	                    sizeof(MobileUser)
-	                        * systemManagerConfig.options.mobileUsers,
-	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
-	    < 0) {
-		perror("IPC error: shmget");
-		exit(EXIT_FAILURE);
-	}
+	shmid = createSharedMemory(systemManagerConfig.options.mobileUsers);
+	msqid = createMessageQueue();
 
 	FORK_FUNCTION(authorizationRequestsManager, shmid);
 	FORK_FUNCTION(monitorEngine);
 
-	MobileUser *sharedMemory = NULL;
-	if ((sharedMemory = shmat(shmid, NULL, 0)) == (MobileUser *) -1) {
-		perror("IPC error: shmat");
-		exit(EXIT_FAILURE);
-	}
-
 	int status;
 	while ((wait(&status)) > 0) {}
 
-	if (shmdt(sharedMemory) == -1) {
-		perror("IPC error: shmdt");
-		exit(EXIT_FAILURE);
-	}
-
-	if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-		perror("IPC error: shmctl");
-		exit(EXIT_FAILURE);
-	}
+	cleanResources();
 
 	logMessage(LOG_SIMULATOR_END);
 
@@ -112,4 +96,10 @@ void usage(const char *const programName)
 	printf("  -h, --help                   Print this usage message\n");
 
 	exit(EXIT_FAILURE);
+}
+
+void cleanResources(void)
+{
+	deleteSharedMemory(shmid);
+	deleteMessageQueue(msqid);
 }

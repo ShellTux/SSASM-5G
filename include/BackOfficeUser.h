@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "MessageQueue.h"
+#include "SystemManager/MessageQueue.h"
 
 #include <stddef.h>
 #include <stdio.h>

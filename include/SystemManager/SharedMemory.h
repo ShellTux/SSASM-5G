@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SSASM_5_SYSTEM_MANAGER_SHARED_MEMORY_H
+#define SSASM_5_SYSTEM_MANAGER_SHARED_MEMORY_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,16 +24,13 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
-
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include <stddef.h>
 
 #define SHARED_MEMORY_KEY         1234
 #define SHARED_MEMORY_SIZE        1024
 #define SHARED_MEMORY_PERMISSIONS 0644
 
-void usage(const char *const programName);
-void cleanResources(void);
+int createSharedMemory(const size_t mobileUsers);
+void deleteSharedMemory(const int id);
 
-#endif // !SYSTEM_MANAGER_H
+#endif // !SSASM_5_SYSTEM_MANAGER_SHARED_MEMORY_H

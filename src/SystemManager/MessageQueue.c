@@ -21,10 +21,14 @@
  *
  ***************************************************************************/
 
-#include "MessageQueue.h"
+#include "SystemManager/MessageQueue.h"
+
+#include "utils/error.h"
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
@@ -37,5 +41,7 @@ int createMessageQueue(void)
 
 void deleteMessageQueue(const int id)
 {
-	msgctl(id, IPC_RMID, NULL);
+	if (msgctl(id, IPC_RMID, NULL) < 0) {
+		HANDLE_ERROR("msgctl: ");
+	}
 }

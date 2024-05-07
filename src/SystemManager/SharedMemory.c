@@ -1,6 +1,3 @@
-#ifndef MESSAGE_QUEUE_H
-#define MESSAGE_QUEUE_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,34 +21,33 @@
  *
  ***************************************************************************/
 
+#include "SystemManager/SharedMemory.h"
+
+#include "MobileUser.h"
+#include "utils/error.h"
+
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
-#define MAX_MESSAGE 256
+int createSharedMemory(const size_t mobileUsers)
+{
+	int shmid;
+	if ((shmid = shmget(SHARED_MEMORY_KEY,
+	                    sizeof(MobileUser) * mobileUsers,
+	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
+	    < 0) {
+		HANDLE_ERROR("shmget: ");
+	}
 
-typedef struct {
-	size_t totalData;
-	size_t authReqs;
-} ServiceStats;
+	return shmid;
+}
 
-
-typedef struct {
-	ServiceStats video;
-	ServiceStats music;
-	ServiceStats social;
-} Statistics;
-
-
-typedef struct {
-	long messageType;
-
-	Statistics stats;
-} Message;
-
-typedef enum {
-	ALERT_MESSAGE = 1,
-	STATISTICS_MESSAGE,
-} MessageType;
-
-int createMessageQueue(void);
-void deleteMessageQueue(const int id);
-#endif // !MESSAGE_QUEUE_H
+void deleteSharedMemory(const int id)
+{
+	if (shmctl(id, IPC_RMID, NULL) < 0) {
+		HANDLE_ERROR("shmctl: ");
+	}
+}
