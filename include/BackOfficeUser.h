@@ -24,12 +24,13 @@
  *
  ***************************************************************************/
 
-#include "SystemManager/MessageQueue.h"
+#include "IPCS/MessageQueue.h"
+#include "IPCS/Pipes.h"
 
 #include <stddef.h>
 #include <stdio.h>
 
-#define AUTHORIZATION_REQUEST_MANAGER_PIPE "BACK_PIPE"
+#define AUTHORIZATION_REQUEST_MANAGER_PIPE BACK_PIPE
 #define COMMAND_MAX                        50
 #define COMMAND_DELIMITER                  "# \n"
 #define INVALID_COMMAND_STRING                       \

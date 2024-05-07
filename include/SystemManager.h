@@ -29,10 +29,6 @@
 #define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
 #define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
 
-#define SHARED_MEMORY_KEY         1234
-#define SHARED_MEMORY_SIZE        1024
-#define SHARED_MEMORY_PERMISSIONS 0644
-
 void usage(const char *const programName);
 void cleanResources(void);
 

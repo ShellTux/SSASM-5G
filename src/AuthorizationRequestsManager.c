@@ -24,6 +24,7 @@
 #include "AuthorizationRequestsManager.h"
 
 #include "AuthorizationRequest.h"
+#include "IPCS/Pipes.h"
 #include "log.h"
 #include "utils/error.h"
 

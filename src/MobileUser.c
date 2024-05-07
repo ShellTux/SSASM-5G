@@ -24,7 +24,7 @@
 #include "MobileUser.h"
 
 #include "AuthorizationRequest.h"
-#include "AuthorizationRequestsManager.h"
+#include "IPCS/Pipes.h"
 #include "utils/error.h"
 
 #include <fcntl.h>

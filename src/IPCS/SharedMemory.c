@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "SystemManager/SharedMemory.h"
+#include "IPCS/SharedMemory.h"
 
 #include "MobileUser.h"
 #include "utils/error.h"
