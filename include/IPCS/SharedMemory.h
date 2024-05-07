@@ -1,3 +1,6 @@
+#ifndef SSASM_5G_IPCS_SHARED_MEMORY_H
+#define SSASM_5G_IPCS_SHARED_MEMORY_H
+
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -21,33 +24,12 @@
  *
  ***************************************************************************/
 
-#include "SystemManager/SharedMemory.h"
-
-#include "MobileUser.h"
-#include "utils/error.h"
-
 #include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
-int createSharedMemory(const size_t mobileUsers)
-{
-	int shmid;
-	if ((shmid = shmget(SHARED_MEMORY_KEY,
-	                    sizeof(MobileUser) * mobileUsers,
-	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
-	    < 0) {
-		HANDLE_ERROR("shmget: ");
-	}
+#define SHARED_MEMORY_KEY         1234
+#define SHARED_MEMORY_PERMISSIONS 0644
 
-	return shmid;
-}
+int createSharedMemory(const size_t mobileUsers);
+void deleteSharedMemory(const int id);
 
-void deleteSharedMemory(const int id)
-{
-	if (shmctl(id, IPC_RMID, NULL) < 0) {
-		HANDLE_ERROR("shmctl: ");
-	}
-}
+#endif // !SSASM_5G_IPCS_SHARED_MEMORY_H

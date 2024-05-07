@@ -23,7 +23,7 @@
 
 #include "BackOfficeUser.h"
 
-#include "SystemManager/MessageQueue.h"
+#include "IPCS/MessageQueue.h"
 
 #include <signal.h>
 #include <stdbool.h>

@@ -24,10 +24,10 @@
 #include "SystemManager.h"
 
 #include "AuthorizationRequestsManager.h"
+#include "IPCS/MessageQueue.h"
+#include "IPCS/SharedMemory.h"
 #include "MobileUser.h"
 #include "MonitorEngine.h"
-#include "SystemManager/MessageQueue.h"
-#include "SystemManager/SharedMemory.h"
 #include "SystemManager/config.h"
 #include "log.h"
 #include "utils/fork.h"
