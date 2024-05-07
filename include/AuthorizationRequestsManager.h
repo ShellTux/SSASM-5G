@@ -29,9 +29,9 @@
 
 #define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
 
-#define USER_PIPE "/tmp/user-pipe.fifo"
+#define USER_PIPE             "/tmp/user-pipe.fifo"
 #define USER_PIPE_PERMISSIONS 0600
-#define BACK_PIPE "/tmp/back-pipe.fifo"
+#define BACK_PIPE             "/tmp/back-pipe.fifo"
 #define BACK_PIPE_PERMISSIONS 0600
 
 void authorizationRequestsManager(const int sharedMemoryID);
