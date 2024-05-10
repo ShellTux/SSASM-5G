@@ -26,17 +26,18 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <time.h>
 
 #define SERVICE_MAX_LENGTH 6
 #define SERVICES       \
-	WRAPPER(VIDEO) \
-	WRAPPER(MUSIC) \
-	WRAPPER(SOCIAL)
+	SERVICE(SERVICE_VIDEO) \
+	SERVICE(SERVICE_MUSIC) \
+	SERVICE(SERVICE_SOCIAL)
 
 typedef enum {
-#define WRAPPER(ENUM) ENUM,
+#define SERVICE(ENUM) ENUM,
 	SERVICES
-#undef WRAPPER
+#undef SERVICE
 } Service;
 
 
@@ -53,18 +54,19 @@ typedef enum {
 	"  mobileUserID: %zu\n"            \
 	"  service: %s\n"                  \
 	"  reservingData: %zu\n"           \
+	"  requestTime: %zu\n"             \
 	"}"
 
 typedef struct {
 	size_t mobileUserID;
 	Service service;
 	size_t reservingData;
+	time_t requestTime;
 } AuthorizationRequest;
 
-AuthorizationRequest
-createAuthorizationRequestFromString(const char *const string);
+AuthorizationRequest parseAuthorizationRequest(const char *const string);
 void printAuthorizationRequest(FILE *file, const AuthorizationRequest request);
 const char *serviceString(const Service service);
-Service serviceFromString(const char *const string);
+Service parseService(const char *const string);
 
 #endif // !AUTHORIZATION_REQUEST_H

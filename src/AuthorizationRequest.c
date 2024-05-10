@@ -41,7 +41,7 @@ createAuthorizationRequestFromString(const char *const string)
 	request.mobileUserID = atoi(token);
 
 	token = strtok(NULL, AUTHORIZATION_REQUEST_MESSAGE_DELIMITERS);
-	request.service = serviceFromString(token);
+	request.service = parseService(token);
 
 	token = strtok(NULL, AUTHORIZATION_REQUEST_MESSAGE_DELIMITERS);
 	request.reservingData = atoi(token);
@@ -57,35 +57,36 @@ void printAuthorizationRequest(FILE *file, const AuthorizationRequest request)
 	        AUTHORIZATION_REQUEST_PRINT_FORMAT "\n",
 	        request.mobileUserID,
 	        serviceString(request.service),
-	        request.reservingData);
+	        request.reservingData,
+	        request.requestTime);
 }
 
 const char *serviceString(const Service service)
 {
 	switch (service) {
-#define WRAPPER(ENUM)         \
+#define SERVICE(ENUM)         \
 	case ENUM: {          \
 		return #ENUM; \
 	};
 		SERVICES
-#undef WRAPPER
+#undef SERVICE
 	}
 
 	return NULL;
 }
 
-Service serviceFromString(const char *const string)
+Service parseService(const char *const string)
 {
 	Service service;
 
 	bool found = false;
-#define WRAPPER(ENUM)                     \
+#define SERVICE(ENUM)                     \
 	if (strcmp(#ENUM, string) == 0) { \
 		found   = true;           \
 		service = ENUM;           \
 	}
 	SERVICES
-#undef WRAPPER
+#undef SERVICE
 
 	assert(found && "Error parsing Service from String");
 

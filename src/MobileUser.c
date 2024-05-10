@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-#define WRAPPER(ENUM)                                         \
+#define SERVICE(ENUM)                                         \
 	sendMessage((AuthorizationRequest){                   \
 	    .mobileUserID  = mobileUser.options.userID,       \
 	    .reservingData = mobileUser.options.reservedData, \
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	});                                                   \
 	authorizationRequests++;
 		SERVICES
-#undef WRAPPER
+#undef SERVICE
 	}
 
 	return EXIT_SUCCESS;
