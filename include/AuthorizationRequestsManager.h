@@ -29,7 +29,7 @@
 
 #define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
 
-void authorizationRequestsManager(const int sharedMemoryID);
+void authorizationRequestsManager(void);
 void *receiverThread(void *argument);
 void *senderThread(void *argument);
 

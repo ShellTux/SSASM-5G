@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	shmid = createSharedMemory(systemManagerConfig.options.mobileUsers);
 	msqid = createMessageQueue();
 
-	FORK_FUNCTION(authorizationRequestsManager, shmid);
+	FORK_FUNCTION(authorizationRequestsManager);
 	FORK_FUNCTION(monitorEngine);
 
 	int status;

@@ -6,4 +6,6 @@
 #define BACK_PIPE             "/tmp/back-pipe.fifo"
 #define BACK_PIPE_PERMISSIONS 0644
 
+void createNamedPipe(const char *const name, const unsigned int permissions);
+
 #endif // !SSASM_5G_IPCS_PIPES_H
