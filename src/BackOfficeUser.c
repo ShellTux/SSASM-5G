@@ -24,20 +24,30 @@
 #include "BackOfficeUser.h"
 
 #include "IPCS/MessageQueue.h"
+#include "IPCS/Pipes.h"
+#include "utils/error.h"
 
+#include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/msg.h>
+#include <unistd.h>
 
 int messageQueueID;
+int backPipeFD;
 
 int main()
 {
 	signal(SIGINT, sigintHandler);
-	messageQueueID = createMessageQueue();
+
+	if ((backPipeFD = open(BACK_PIPE, O_RDWR)) < 0) {
+		HANDLE_ERROR("open: " BACK_PIPE);
+	}
+
+	// TODO: get message queue id
 
 	while (true) {
 		printf(PROMPT);
@@ -47,32 +57,57 @@ int main()
 			break;
 		}
 
-		const Command command = processCommand(commandString);
-		switch (command.command) {
-#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
-	case ENUM:                                    \
-		FUNCTION(command.backofficeID);       \
-		break;
-			COMMANDS
-#undef COMMAND
-		case INVALID_COMMAND:
-		default:
-			invalidCommand();
-			break;
-		}
+		const Command command = parseCommand(commandString);
+		executeCommand(command);
 	}
 
 	return EXIT_SUCCESS;
+}
+
+void executeCommand(const Command command)
+{
+	char message[MESSAGE_MAX + 1] = {0};
+
+	char *commandString = NULL;
+
+	switch (command.command) {
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	case ENUM: {                                  \
+		commandString = #COMMAND;             \
+	} break;
+		COMMANDS
+#undef COMMAND
+	case INVALID_COMMAND:
+	default: {
+		invalidCommand();
+	}
+		return;
+	}
+
+	if (commandString == NULL) {
+		return;
+	}
+
+	snprintf(message,
+	         MESSAGE_MAX,
+	         MESSAGE_FORMAT,
+	         command.backofficeID,
+	         commandString);
+
+	if (write(backPipeFD, message, strnlen(message, MESSAGE_MAX)) < 0) {
+		HANDLE_ERROR("write: ");
+	}
 }
 
 void sigintHandler(const int signal)
 {
 	(void) signal;
 	printf(SIGINT_MESSAGE);
+	close(backPipeFD);
 	exit(EXIT_SUCCESS);
 }
 
-Command processCommand(char *const string)
+Command parseCommand(char *const string)
 {
 	static const Command invalidCommand = {
 	    .backofficeID = 0,

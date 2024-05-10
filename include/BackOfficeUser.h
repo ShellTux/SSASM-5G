@@ -52,6 +52,9 @@
 	        reset,                                                        \
 	        "Clears related statistics calculated so far by the system.")
 
+#define MESSAGE_MAX    32
+#define MESSAGE_FORMAT "%zu#%s"
+
 typedef struct {
 	size_t backofficeID;
 	enum {
@@ -66,13 +69,12 @@ typedef struct {
 	void FUNCTION(const size_t id);
 COMMANDS
 #undef COMMAND
+
 void invalidCommand(void);
 
-void sendMessage(const int userID,
-                 const char *const serviceID,
-                 const int dataReservation);
 void sigintHandler(const int signal);
-Command processCommand(char *const string);
+Command parseCommand(char *const string);
+void executeCommand(const Command command);
 
 void printStats(FILE *file, Statistics stats);
 
