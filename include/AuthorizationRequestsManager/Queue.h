@@ -1,5 +1,5 @@
-#ifndef AUTHORIZATION_REQUESTS_MANAGER_H
-#define AUTHORIZATION_REQUESTS_MANAGER_H
+#ifndef SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
+#define SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,25 +24,17 @@
  *
  ***************************************************************************/
 
-#include "AuthorizationEngine.h"
-#include "AuthorizationRequestsManager/Queue.h"
+#include "AuthorizationRequest.h"
 
 #include <stddef.h>
 
-#define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
-	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
-
-#define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
-#define LOG_THREAD_EXIT(WHO)    "THREAD " #WHO " EXITING..."
-
 typedef struct {
-	AuthorizationEngine *engines;
+	int writePos, readPos;
+	AuthorizationRequest *data;
 	size_t size;
-} AuthorizationEngines;
+} Queue;
 
-void authorizationRequestsManager(void);
-AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers);
-void *receiverThread(void *argument);
-void *senderThread(void *argument);
+Queue createQueue(const size_t size);
+void destroyQueue(Queue *queue);
 
-#endif // !AUTHORIZATION_REQUESTS_MANAGER_H
+#endif // !SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
