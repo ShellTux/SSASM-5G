@@ -24,9 +24,13 @@
  *
  ***************************************************************************/
 
-#include <stddef.h>
+#include "IPCS/MessageQueue.h"
+#include "IPCS/Pipes.h"
 
-#define AUTHORIZATION_REQUEST_MANAGER_PIPE "BACK_PIPE"
+#include <stddef.h>
+#include <stdio.h>
+
+#define AUTHORIZATION_REQUEST_MANAGER_PIPE BACK_PIPE
 #define COMMAND_MAX                        50
 #define COMMAND_DELIMITER                  "# \n"
 #define INVALID_COMMAND_STRING                       \
@@ -37,37 +41,41 @@
 #define SIGINT_MESSAGE "Received SIGINT. Exiting...\n"
 
 #define COMMANDS                                                              \
-	WRAPPER(DATA_STATS_COMMAND,                                           \
+	COMMAND(DATA_STATS_COMMAND,                                           \
 	        dataStatsCommand,                                             \
 	        data_stats,                                                   \
 	        "Presents statistics regarding data consumption"              \
 	        "in the various services: total reserved data and number of " \
 	        "authorization renewal requests;")                            \
-	WRAPPER(RESET_COMMAND,                                                \
+	COMMAND(RESET_COMMAND,                                                \
 	        resetCommand,                                                 \
 	        reset,                                                        \
 	        "Clears related statistics calculated so far by the system.")
 
+#define MESSAGE_MAX    32
+#define MESSAGE_FORMAT "%zu#%s"
+
 typedef struct {
-	size_t id;
+	size_t backofficeID;
 	enum {
 		INVALID_COMMAND,
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) ENUM,
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) ENUM,
 		COMMANDS
-#undef WRAPPER
+#undef COMMAND
 	} command;
 } Command;
 
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
 	void FUNCTION(const size_t id);
 COMMANDS
-#undef WRAPPER
+#undef COMMAND
+
 void invalidCommand(void);
 
-void sendMessage(const int userID,
-                 const char *const serviceID,
-                 const int dataReservation);
 void sigintHandler(const int signal);
-Command processCommand(char *const string);
+Command parseCommand(char *const string);
+void executeCommand(const Command command);
+
+void printStats(FILE *file, Statistics stats);
 
 #endif // !BACK_OFFICE_USER_H

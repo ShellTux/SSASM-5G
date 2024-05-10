@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,12 +21,9 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "AuthorizationEngine.h"
+#include "log.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
-
-void usage(const char *const programName);
-void cleanResources(void);
-
-#endif // !SYSTEM_MANAGER_H
+void authorizationEngine(void) {
+	logMessage("%s", LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED);
+}

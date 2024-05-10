@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef MESSAGE_QUEUE_H
+#define MESSAGE_QUEUE_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,12 +24,35 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include <stddef.h>
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#define MAX_MESSAGE 256
 
-void usage(const char *const programName);
-void cleanResources(void);
+typedef struct {
+	size_t totalData;
+	size_t authReqs;
+} ServiceStats;
 
-#endif // !SYSTEM_MANAGER_H
+
+typedef struct {
+	ServiceStats video;
+	ServiceStats music;
+	ServiceStats social;
+} Statistics;
+
+
+typedef struct {
+	long messageType;
+
+	Statistics stats;
+} Message;
+
+typedef enum {
+	ALERT_MESSAGE = 1,
+	STATISTICS_MESSAGE,
+} MessageType;
+
+int createMessageQueue(void);
+void deleteMessageQueue(const int id);
+
+#endif // !MESSAGE_QUEUE_H

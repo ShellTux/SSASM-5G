@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,12 +21,23 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "AuthorizationRequestsManager/Queue.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include "AuthorizationRequest.h"
 
-void usage(const char *const programName);
-void cleanResources(void);
+#include <stddef.h>
+#include <stdlib.h>
 
-#endif // !SYSTEM_MANAGER_H
+Queue createQueue(const size_t size)
+{
+	static const Queue invalidQueue = {0};
+
+	Queue queue = {
+	    .size     = size,
+	    .writePos = 0,
+	    .readPos  = 0,
+	    .data     = calloc(size, sizeof(AuthorizationRequest)),
+	};
+
+	return queue.data == NULL ? invalidQueue : queue;
+}

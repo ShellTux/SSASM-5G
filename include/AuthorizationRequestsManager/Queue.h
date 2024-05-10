@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
+#define SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,12 +24,17 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "AuthorizationRequest.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include <stddef.h>
 
-void usage(const char *const programName);
-void cleanResources(void);
+typedef struct {
+	int writePos, readPos;
+	AuthorizationRequest *data;
+	size_t size;
+} Queue;
 
-#endif // !SYSTEM_MANAGER_H
+Queue createQueue(const size_t size);
+void destroyQueue(Queue *queue);
+
+#endif // !SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H

@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,12 +21,27 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "SystemManager/MessageQueue.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include "utils/error.h"
 
-void usage(const char *const programName);
-void cleanResources(void);
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
-#endif // !SYSTEM_MANAGER_H
+int createMessageQueue(void)
+{
+	int id;
+	assert((id = msgget(IPC_PRIVATE, IPC_CREAT | 0700)) != -1);
+	return id;
+}
+
+void deleteMessageQueue(const int id)
+{
+	if (msgctl(id, IPC_RMID, NULL) < 0) {
+		HANDLE_ERROR("msgctl: ");
+	}
+}

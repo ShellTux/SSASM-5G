@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SSASM_5G_AUTHORIZATION_ENGINE_H
+#define SSASM_5G_AUTHORIZATION_ENGINE_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,12 +24,15 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include <stdbool.h>
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#define LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED \
+	"PROCESS AUTHORIZATION_ENGINE CREATED"
 
-void usage(const char *const programName);
-void cleanResources(void);
+typedef struct {
+	bool busy;
+} AuthorizationEngine;
 
-#endif // !SYSTEM_MANAGER_H
+void authorizationEngine(void);
+
+#endif // !SSASM_5G_AUTHORIZATION_ENGINE_H
