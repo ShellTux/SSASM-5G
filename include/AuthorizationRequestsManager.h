@@ -32,6 +32,7 @@
 	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
 
 #define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
+#define LOG_THREAD_EXIT(WHO) "THREAD " #WHO " EXITING..."
 
 typedef struct {
 	AuthorizationEngine *engines;

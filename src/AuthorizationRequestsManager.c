@@ -72,18 +72,37 @@ void authorizationRequestsManager(void)
 void *receiverThread(void *argument)
 {
 	(void) argument;
+
 	logMessage(LOG_THREAD_CREATED(RECEIVER));
 
+#define RECEIVER_THREAD_WIP 1
+
 	int userPipeFD;
+#if RECEIVER_THREAD_WIP
+	if ((userPipeFD = open(USER_PIPE, O_RDONLY | O_NONBLOCK)) < 0) {
+#else
 	if ((userPipeFD = open(USER_PIPE, O_RDONLY)) < 0) {
+#endif
 		HANDLE_ERROR("open: ");
 	}
 
-	char buffer[4097] = {0};
-	read(userPipeFD, buffer, 4096);
-	AuthorizationRequest request
-	    = createAuthorizationRequestFromString(buffer);
-	printAuthorizationRequest(stdout, request);
+	int backPipeFD;
+#if RECEIVER_THREAD_WIP
+	if ((backPipeFD = open(BACK_PIPE, O_RDONLY | O_NONBLOCK)) < 0) {
+#else
+	if ((backPipeFD = open(BACK_PIPE, O_RDONLY)) < 0) {
+#endif
+		HANDLE_ERROR("open: ");
+	}
+
+#undef RECEIVER_THREAD_WIP
+
+	// TODO: Parse the message from the pipe and send it to the queues
+
+	close(userPipeFD);
+	close(backPipeFD);
+
+	logMessage(LOG_THREAD_EXIT(RECEIVER));
 
 	pthread_exit(NULL);
 }
