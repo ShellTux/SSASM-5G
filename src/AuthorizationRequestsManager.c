@@ -111,6 +111,11 @@ void *senderThread(void *argument)
 {
 	(void) argument;
 	logMessage(LOG_THREAD_CREATED(SENDER));
+
+	// TODO: Read Authorization Request from queues and deliver in an
+	// available AuthorizationEngine
+
+	logMessage(LOG_THREAD_EXIT(SENDER));
 	pthread_exit(NULL);
 }
 
