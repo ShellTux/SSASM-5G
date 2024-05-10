@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-#define SERVICE(ENUM)                                         \
+#define SERVICE(ENUM, STRING)                                 \
 	sendMessage((AuthorizationRequest){                   \
 	    .mobileUserID  = mobileUser.options.userID,       \
 	    .reservingData = mobileUser.options.reservedData, \

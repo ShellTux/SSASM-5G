@@ -42,7 +42,7 @@ AuthorizationRequest parseAuthorizationRequest(const char *const string)
 
 	token = strtok(NULL, AUTHORIZATION_REQUEST_MESSAGE_DELIMITERS);
 
-	struct ServiceOptional service = parseService(token);
+	ServiceOptional service = parseService(token);
 
 	if (!service.valid) {
 		free(cloneString);
@@ -72,7 +72,7 @@ void printAuthorizationRequest(FILE *file, const AuthorizationRequest request)
 const char *serviceString(const Service service)
 {
 	switch (service) {
-#define SERVICE(ENUM)         \
+#define SERVICE(ENUM, STRING) \
 	case ENUM: {          \
 		return #ENUM; \
 	};
@@ -83,17 +83,16 @@ const char *serviceString(const Service service)
 	return NULL;
 }
 
-struct ServiceOptional parseService(const char *const string)
+ServiceOptional parseService(const char *const string)
 {
-#define SERVICE(ENUM)                                             \
-	if (strcmp(#ENUM, string) == 0) {                         \
-		return (struct ServiceOptional){.valid   = true,  \
-		                                .service = ENUM}; \
+#define SERVICE(ENUM, STRING)                                             \
+	if (strcmp(STRING, string) == 0) {                                \
+		return (ServiceOptional){.valid = true, .service = ENUM}; \
 	}
 	SERVICES
 #undef SERVICE
 
-	return (struct ServiceOptional){
+	return (ServiceOptional){
 	    .valid   = false,
 	    .service = 0,
 	};
