@@ -49,12 +49,12 @@ int main()
 
 		const Command command = processCommand(commandString);
 		switch (command.command) {
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
 	case ENUM:                                    \
-		FUNCTION(command.id);                 \
+		FUNCTION(command.backofficeID);       \
 		break;
 			COMMANDS
-#undef WRAPPER
+#undef COMMAND
 		case INVALID_COMMAND:
 		default:
 			invalidCommand();
@@ -75,8 +75,8 @@ void sigintHandler(const int signal)
 Command processCommand(char *const string)
 {
 	static const Command invalidCommand = {
-	    .id      = 0,
-	    .command = INVALID_COMMAND,
+	    .backofficeID = 0,
+	    .command      = INVALID_COMMAND,
 	};
 
 	Command command = invalidCommand;
@@ -87,20 +87,20 @@ Command processCommand(char *const string)
 		return invalidCommand;
 	}
 
-	command.id = atoi(token);
+	command.backofficeID = atoi(token);
 
 	token = strtok(NULL, COMMAND_DELIMITER);
 	if (token == NULL) {
 		return invalidCommand;
 	}
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
 	else if (strncmp(token, #COMMAND, COMMAND_MAX) == 0) \
 	{                                                    \
 		command.command = ENUM;                      \
 		return command;                              \
 	}
 	COMMANDS
-#undef WRAPPER
+#undef COMMAND
 
 	return invalidCommand;
 }
@@ -108,10 +108,10 @@ Command processCommand(char *const string)
 void invalidCommand(void)
 {
 	printf("Invalid Command. Available commands are:\n");
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
 	printf("  - %s: %s\n", #COMMAND, DESCRIPTION);
 	COMMANDS
-#undef WRAPPER
+#undef COMMAND
 }
 
 void dataStatsCommand(const size_t id)

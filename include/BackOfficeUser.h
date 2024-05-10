@@ -41,31 +41,31 @@
 #define SIGINT_MESSAGE "Received SIGINT. Exiting...\n"
 
 #define COMMANDS                                                              \
-	WRAPPER(DATA_STATS_COMMAND,                                           \
+	COMMAND(DATA_STATS_COMMAND,                                           \
 	        dataStatsCommand,                                             \
 	        data_stats,                                                   \
 	        "Presents statistics regarding data consumption"              \
 	        "in the various services: total reserved data and number of " \
 	        "authorization renewal requests;")                            \
-	WRAPPER(RESET_COMMAND,                                                \
+	COMMAND(RESET_COMMAND,                                                \
 	        resetCommand,                                                 \
 	        reset,                                                        \
 	        "Clears related statistics calculated so far by the system.")
 
 typedef struct {
-	size_t id;
+	size_t backofficeID;
 	enum {
 		INVALID_COMMAND,
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) ENUM,
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) ENUM,
 		COMMANDS
-#undef WRAPPER
+#undef COMMAND
 	} command;
 } Command;
 
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
 	void FUNCTION(const size_t id);
 COMMANDS
-#undef WRAPPER
+#undef COMMAND
 void invalidCommand(void);
 
 void sendMessage(const int userID,
