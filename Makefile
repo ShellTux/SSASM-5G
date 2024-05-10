@@ -39,7 +39,7 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir --parents `dirname "$@"`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string AuthorizationRequest SystemManager/SharedMemory SystemManager/MessageQueue IPCS/Pipes
+SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string AuthorizationRequest SystemManager/SharedMemory SystemManager/MessageQueue IPCS/Pipes AuthorizationEngine
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 SOURCES = BackOfficeUser MessageQueue

@@ -1,5 +1,5 @@
-#ifndef AUTHORIZATION_REQUESTS_MANAGER_H
-#define AUTHORIZATION_REQUESTS_MANAGER_H
+#ifndef SSASM_5G_AUTHORIZATION_ENGINE_H
+#define SSASM_5G_AUTHORIZATION_ENGINE_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,23 +24,15 @@
  *
  ***************************************************************************/
 
-#include "AuthorizationEngine.h"
+#include <stdbool.h>
 
-#include <stddef.h>
-
-#define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
-	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
-
-#define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
+#define LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED \
+	"PROCESS AUTHORIZATION_ENGINE CREATED"
 
 typedef struct {
-	AuthorizationEngine *engines;
-	size_t size;
-} AuthorizationEngines;
+	bool busy;
+} AuthorizationEngine;
 
-void authorizationRequestsManager(void);
-AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers);
-void *receiverThread(void *argument);
-void *senderThread(void *argument);
+void authorizationEngine(void);
 
-#endif // !AUTHORIZATION_REQUESTS_MANAGER_H
+#endif // !SSASM_5G_AUTHORIZATION_ENGINE_H

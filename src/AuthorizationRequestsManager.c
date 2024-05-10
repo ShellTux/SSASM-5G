@@ -23,10 +23,12 @@
 
 #include "AuthorizationRequestsManager.h"
 
+#include "AuthorizationEngine.h"
 #include "AuthorizationRequest.h"
 #include "IPCS/Pipes.h"
 #include "log.h"
 #include "utils/error.h"
+#include "utils/fork.h"
 
 #include <bits/pthreadtypes.h>
 #include <fcntl.h>
@@ -36,6 +38,7 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 void authorizationRequestsManager(void)
@@ -61,6 +64,9 @@ void authorizationRequestsManager(void)
 
 	unlink(USER_PIPE);
 	unlink(BACK_PIPE);
+
+	int status;
+	while ((wait(&status)) > 0) {}
 }
 
 void *receiverThread(void *argument)
@@ -87,4 +93,26 @@ void *senderThread(void *argument)
 	(void) argument;
 	logMessage(LOG_THREAD_CREATED(SENDER));
 	pthread_exit(NULL);
+}
+
+AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers)
+{
+	static const AuthorizationEngines invalidEngines = {0};
+
+	AuthorizationEngines engines = invalidEngines;
+
+	if (maxAuthServers <= 0) {
+		return engines;
+	}
+
+	engines = (AuthorizationEngines){
+	    .size    = maxAuthServers,
+	    .engines = calloc(maxAuthServers, sizeof(AuthorizationEngine)),
+	};
+
+	for (size_t i = 0; i < engines.size; ++i) {
+		FORK_FUNCTION(authorizationEngine);
+	}
+
+	return engines.engines == NULL ? invalidEngines : engines;
 }

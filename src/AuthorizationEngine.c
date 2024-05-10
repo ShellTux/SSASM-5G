@@ -1,6 +1,3 @@
-#ifndef AUTHORIZATION_REQUESTS_MANAGER_H
-#define AUTHORIZATION_REQUESTS_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -25,22 +22,8 @@
  ***************************************************************************/
 
 #include "AuthorizationEngine.h"
+#include "log.h"
 
-#include <stddef.h>
-
-#define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
-	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
-
-#define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
-
-typedef struct {
-	AuthorizationEngine *engines;
-	size_t size;
-} AuthorizationEngines;
-
-void authorizationRequestsManager(void);
-AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers);
-void *receiverThread(void *argument);
-void *senderThread(void *argument);
-
-#endif // !AUTHORIZATION_REQUESTS_MANAGER_H
+void authorizationEngine(void) {
+	logMessage("%s", LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED);
+}
