@@ -27,6 +27,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define SERVICE_MAX_LENGTH 6
 #define SERVICES       \
@@ -67,6 +68,9 @@ typedef struct {
 AuthorizationRequest parseAuthorizationRequest(const char *const string);
 void printAuthorizationRequest(FILE *file, const AuthorizationRequest request);
 const char *serviceString(const Service service);
-Service parseService(const char *const string);
+struct ServiceOptional {
+	bool valid;
+	Service service;
+} parseService(const char *const string);
 
 #endif // !AUTHORIZATION_REQUEST_H
