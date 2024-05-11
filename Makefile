@@ -53,7 +53,7 @@ SOURCES = \
 	  utils/string
 5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-SOURCES = BackOfficeUser IPCS/MessageQueue
+SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command
 backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 SOURCES = MobileUser AuthorizationRequest

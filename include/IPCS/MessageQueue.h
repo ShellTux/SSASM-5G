@@ -25,8 +25,18 @@
  ***************************************************************************/
 
 #include <stddef.h>
+#include <stdio.h>
 
 #define MAX_MESSAGE 256
+
+typedef enum {
+	EXIT = -1,
+	OK,
+	ALERT_100,
+	ALERT_90,
+	ALERT_80,
+} DataCapAlert;
+
 
 typedef struct {
 	size_t totalData;
@@ -40,16 +50,26 @@ typedef struct {
 	ServiceStats social;
 } Statistics;
 
+#define STATISTICS_MESSAGE                       \
+	"\tService    Total Data    Auth Reqs\n" \
+	"\tVIDEO      %-10zu         %-10zu\n"   \
+	"\tMUSIC      %-10zu         %-10zu\n"   \
+	"\tSOCIAL     %-10zu         %-10zu"
+
+void printStatistics(FILE *file, const Statistics stats);
 
 typedef struct {
 	long messageType;
 
+	DataCapAlert alert;
 	Statistics stats;
 } Message;
 
+#define MESSAGE_SIZE sizeof(Message) - sizeof(long)
+
 typedef enum {
-	ALERT_MESSAGE = 1,
-	STATISTICS_MESSAGE,
+	ALERT_MESSAGE_TYPE = 1,
+	STATISTICS_MESSAGE_TYPE,
 } MessageType;
 
 int createMessageQueue(void);

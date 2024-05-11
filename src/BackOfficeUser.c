@@ -23,6 +23,7 @@
 
 #include "BackOfficeUser.h"
 
+#include "BackOfficeUser/Command.h"
 #include "IPCS/MessageQueue.h"
 #include "IPCS/Pipes.h"
 #include "utils/error.h"
@@ -30,6 +31,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,17 +51,6 @@ int main()
 
 	// TODO: get message queue id
 
-	while (true) {
-		printf(PROMPT);
-
-		char commandString[COMMAND_MAX + 1] = {0};
-		if (scanf(" %[^\n]%*c", commandString) == EOF) {
-			break;
-		}
-
-		const Command command = parseCommand(commandString);
-		executeCommand(command);
-	}
 
 	return EXIT_SUCCESS;
 }
@@ -107,84 +98,30 @@ void sigintHandler(const int signal)
 	exit(EXIT_SUCCESS);
 }
 
-Command parseCommand(char *const string)
+void listenForMessages(void)
 {
-	static const Command invalidCommand = {
-	    .backofficeID = 0,
-	    .command      = INVALID_COMMAND,
-	};
+	Message message;
 
-	Command command = invalidCommand;
-
-	// NOTE: strtok is not thread safe
-	char *token = strtok(string, COMMAND_DELIMITER);
-	if (token == NULL) {
-		return invalidCommand;
+	while (true) {
+		msgrcv(messageQueueID,
+		       &message,
+		       MESSAGE_SIZE,
+		       STATISTICS_MESSAGE_TYPE,
+		       0);
+		printStatistics(stdout, message.stats);
 	}
+}
 
-	command.backofficeID = atoi(token);
+void listenForCommands(void)
+{
+	while (true) {
+		printf(PROMPT);
 
-	token = strtok(NULL, COMMAND_DELIMITER);
-	if (token == NULL) {
-		return invalidCommand;
+		char commandString[COMMAND_MAX + 1] = {0};
+		if (scanf(" %[^\n]%*c", commandString) == EOF) {
+			break;
+		}
+
+		executeCommand(parseCommand(commandString));
 	}
-#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
-	else if (strncmp(token, #COMMAND, COMMAND_MAX) == 0) \
-	{                                                    \
-		command.command = ENUM;                      \
-		return command;                              \
-	}
-	COMMANDS
-#undef COMMAND
-
-	return invalidCommand;
-}
-
-void invalidCommand(void)
-{
-	printf("Invalid Command. Available commands are:\n");
-#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
-	printf("  - %s: %s\n", #COMMAND, DESCRIPTION);
-	COMMANDS
-#undef COMMAND
-}
-
-void dataStatsCommand(const size_t id)
-{
-	Statistics stats;
-	msgrcv(messageQueueID,
-	       &stats,
-	       sizeof(stats) - sizeof(long),
-	       STATISTICS_MESSAGE,
-	       0);
-	printStats(stdout, stats);
-}
-
-void resetCommand(const size_t id)
-{
-	printf("reset: %zu\n", id);
-}
-
-void printStats(FILE *file, Statistics stats)
-{
-	fprintf(file,
-	        "%-10s %-10s %-10s\n",
-	        "SERVICE",
-	        "Total Data",
-	        "Auth Reqs");
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "VIDEO",
-	        stats.video.totalData,
-	        stats.video.authReqs);
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "MUSIC",
-	        stats.music.totalData,
-	        stats.music.authReqs);
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "SOCIAL",
-	        stats.social.totalData,
-	        stats.social.authReqs);
 }

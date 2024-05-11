@@ -32,6 +32,22 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+void printStatistics(FILE *file, Statistics stats)
+{
+	if (file == NULL) {
+		return;
+	}
+
+	fprintf(file,
+	        STATISTICS_MESSAGE,
+	        stats.video.totalData,
+	        stats.video.authReqs,
+	        stats.music.totalData,
+	        stats.music.authReqs,
+	        stats.social.totalData,
+	        stats.social.authReqs);
+}
+
 int createMessageQueue(void)
 {
 	int id;
