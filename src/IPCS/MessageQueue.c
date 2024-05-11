@@ -32,6 +32,19 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+char *dataCapAlertToString(const DataCapAlert alert)
+{
+	switch (alert) {
+#define DATA_CAP_ALERT(ENUM, ENUM_EXPR, FORMAT) \
+	case ENUM:                              \
+		return FORMAT;
+		DATA_CAP_ALERTS
+#undef DATA_CAP_ALERT
+	default:
+		return NULL;
+	}
+}
+
 void printStatistics(FILE *file, Statistics stats)
 {
 	if (file == NULL) {
@@ -51,7 +64,20 @@ void printStatistics(FILE *file, Statistics stats)
 int createMessageQueue(void)
 {
 	int id;
-	assert((id = msgget(IPC_PRIVATE, IPC_CREAT | 0700)) != -1);
+	if ((id = msgget(ftok(MESSAGE_QUEUE_PATH, MESSAGE_QUEUE_ID),
+	                 IPC_CREAT | MESSAGE_QUEUE_PERMISSIONS))
+	    < 0) {
+		HANDLE_ERROR("msgget: ");
+	}
+	return id;
+}
+
+int openMessageQueue(void)
+{
+	int id;
+	if ((id = msgget(ftok(MESSAGE_QUEUE_PATH, MESSAGE_QUEUE_ID), 0)) < 0) {
+		HANDLE_ERROR("msgget: ");
+	}
 	return id;
 }
 

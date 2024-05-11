@@ -29,14 +29,20 @@
 
 #define MAX_MESSAGE 256
 
+#define DATA_CAP_ALERTS                                               \
+	DATA_CAP_ALERT(EXIT, = -1, "Shutting down alert listener...") \
+	DATA_CAP_ALERT(OK, , "")                                      \
+	DATA_CAP_ALERT(ALERT_100, , "Data cap reached 100%%")         \
+	DATA_CAP_ALERT(ALERT_90, , "Data cap reached 90%%")           \
+	DATA_CAP_ALERT(ALERT_80, , "Data cap reached 80%%")
+
 typedef enum {
-	EXIT = -1,
-	OK,
-	ALERT_100,
-	ALERT_90,
-	ALERT_80,
+#define DATA_CAP_ALERT(ENUM, ENUM_EXPR, FORMAT) ENUM ENUM_EXPR,
+	DATA_CAP_ALERTS
+#undef DATA_CAP_ALERT
 } DataCapAlert;
 
+char *dataCapAlertToString(const DataCapAlert alert);
 
 typedef struct {
 	size_t totalData;
@@ -72,7 +78,12 @@ typedef enum {
 	STATISTICS_MESSAGE_TYPE,
 } MessageType;
 
+#define MESSAGE_QUEUE_PATH "/tmp/message-queue"
+#define MESSAGE_QUEUE_ID   5
+#define MESSAGE_QUEUE_PERMISSIONS 0700
+
 int createMessageQueue(void);
+int openMessageQueue(void);
 void deleteMessageQueue(const int id);
 
 #endif // !MESSAGE_QUEUE_H

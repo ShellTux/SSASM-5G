@@ -42,6 +42,7 @@
 	"  reservedData: %zu\n"   \
 	"  userID: %zu\n"         \
 	"}"
+
 typedef union {
 	struct {
 		size_t plafondInicial;
@@ -59,11 +60,15 @@ typedef union {
 } MobileUser;
 
 bool isMobileUserValid(const MobileUser mobileUser);
+int authorizationRequestInterval(const AuthorizationRequest request);
 MobileUser createMobileUserFromArgs(char **arguments,
                                     const int argumentsLength);
 void printMobileUser(FILE *file, const MobileUser mobileUser);
 void usage(const char *const programName);
 void sendMessage(const AuthorizationRequest request);
 void sigintHandler(const int signal);
+void listenToMessageAlerts(void);
+void sendDataServiceRequests(const MobileUser mobileUser);
+void cleanup(void);
 
 #endif // !MOBILE_USER_H
