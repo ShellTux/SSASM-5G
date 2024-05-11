@@ -4,7 +4,7 @@ set -e
 usage() {
 	echo "Usage: $(basename "$0") [options] n"
 	echo Options:
-	echo "  -h, --help                   Print this usage message";
+	echo "  -h, --help                   Print this usage message"
 	exit 1
 }
 
