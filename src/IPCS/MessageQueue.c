@@ -21,7 +21,7 @@
  *
  ***************************************************************************/
 
-#include "SystemManager/MessageQueue.h"
+#include "IPCS/MessageQueue.h"
 
 #include "utils/error.h"
 
