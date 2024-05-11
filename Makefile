@@ -19,6 +19,12 @@ CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
 LINKS   =
 
+CCACHE_EXISTS := $(shell ccache -V)
+ifdef CCACHE_EXISTS
+	CC        := ccache $(CC)
+	CXX       := ccache $(CXX)
+endif
+
 ifneq ($(shell command -v batcat 2>/dev/null),)
 	BAT = batcat
 else
