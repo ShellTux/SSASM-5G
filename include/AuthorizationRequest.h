@@ -30,7 +30,7 @@
 #include <time.h>
 
 #define SERVICE_MAX_LENGTH 6
-#define SERVICES               \
+#define SERVICES                        \
 	SERVICE(SERVICE_VIDEO, "VIDEO") \
 	SERVICE(SERVICE_MUSIC, "MUSIC") \
 	SERVICE(SERVICE_SOCIAL, "SOCIAL")

@@ -78,8 +78,8 @@ typedef enum {
 	STATISTICS_MESSAGE_TYPE,
 } MessageType;
 
-#define MESSAGE_QUEUE_PATH "/tmp/message-queue"
-#define MESSAGE_QUEUE_ID   5
+#define MESSAGE_QUEUE_PATH        "/tmp/message-queue"
+#define MESSAGE_QUEUE_ID          5
 #define MESSAGE_QUEUE_PERMISSIONS 0700
 
 int createMessageQueue(void);

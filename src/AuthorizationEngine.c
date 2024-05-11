@@ -22,8 +22,10 @@
  ***************************************************************************/
 
 #include "AuthorizationEngine.h"
+
 #include "log.h"
 
-void authorizationEngine(void) {
+void authorizationEngine(void)
+{
 	logMessage("%s", LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED);
 }
