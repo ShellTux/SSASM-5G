@@ -8,6 +8,10 @@ HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
 	   -name "*.hpp" \
 	   2>/dev/null | tr '\n' ' ')
+SOURCES  = $(shell find $(SRC_DIR) \
+	   -name "*.c" -o \
+	   -name "*.cpp" \
+	   2>/dev/null | tr '\n' ' ')
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror
@@ -45,7 +49,11 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir --parents `dirname "$@"`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = \
+.PHONY: format
+format:
+	clang-format -i $(SOURCES) $(HEADERS)
+
+_SOURCES = \
 	  AuthorizationEngine \
 	  AuthorizationRequest \
 	  AuthorizationRequestsManager \
@@ -57,13 +65,13 @@ SOURCES = \
 	  SystemManager \
 	  SystemManager/config \
 	  utils/string
-5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+5g_auth_platform: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command
-backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+_SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command
+backoffice_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-SOURCES = MobileUser AuthorizationRequest
-mobile_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+_SOURCES = MobileUser AuthorizationRequest IPCS/MessageQueue
+mobile_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target
 $(TARGETS): %:
@@ -132,6 +140,7 @@ warning:
 		&& exit 1 \
 		|| true
 
+.PHONY: explore
 explore:
 	find $(SRC_DIR) $(INCLUDE_DIR) -type f -name "*.[ch]" \
 		| fzf --preview "$(BAT) --color=always --style=numbers {}" \
