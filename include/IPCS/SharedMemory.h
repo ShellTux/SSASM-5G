@@ -24,12 +24,21 @@
  *
  ***************************************************************************/
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #define SHARED_MEMORY_KEY         1234
 #define SHARED_MEMORY_PERMISSIONS 0644
 
-int createSharedMemory(const size_t mobileUsers);
+typedef struct {
+	size_t id;
+	size_t plafondInitial;
+	size_t plafondUsed;
+} MobileUserRecord;
+
+int createSharedMemory(const size_t size, const bool zeroFill);
+void *attachSharedMemory(const int id);
+void detachSharedMemory(const void *sharedMemoryPointer);
 void deleteSharedMemory(const int id);
 
 #endif // !SSASM_5G_IPCS_SHARED_MEMORY_H

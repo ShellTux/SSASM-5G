@@ -34,5 +34,6 @@ typedef struct {
 } AuthorizationEngine;
 
 void authorizationEngine(void);
+void resetStats(void);
 
 #endif // !SSASM_5G_AUTHORIZATION_ENGINE_H

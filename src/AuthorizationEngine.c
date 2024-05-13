@@ -23,9 +23,26 @@
 
 #include "AuthorizationEngine.h"
 
+#include "IPCS/MessageQueue.h"
 #include "log.h"
+
+#include <stddef.h>
+#include <stdio.h>
+
+extern int sharedStatsID;
+Statistics *stats                    = NULL;
+static const Statistics resetedStats = {0};
 
 void authorizationEngine(void)
 {
 	logMessage("%s", LOG_AUTHORIZATION_ENGINE_PROCESS_CREATED);
+}
+
+void resetStats(void)
+{
+	if (stats == NULL) {
+		printDebug(stdout, DEBUG_WARNING, "Stats not initialized\n");
+	}
+
+	*stats = resetedStats;
 }
