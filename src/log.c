@@ -73,4 +73,58 @@ void openLogFile(void)
 	}
 
 	logFile = fopen(LOG_FILEPATH, "a");
+
+	if (logFile == NULL) {
+		printDebug(stdout, DEBUG_ERROR, "Error opening log file\n");
+	} else {
+		printDebug(stdout,
+		           DEBUG_OK,
+		           "Opened log file: %s\n",
+		           LOG_FILEPATH);
+	}
+}
+
+char *debugLevelString(const DebugLevel level)
+{
+	switch (level) {
+#define DEBUG_LEVEL(ENUM, STRING, COLOR) \
+	case ENUM:                       \
+		return STRING;
+		DEBUG_LEVELS
+#undef DEBUG_LEVEL
+	}
+
+	return NULL;
+}
+
+char *debugLevelColor(const DebugLevel level)
+{
+	switch (level) {
+#define DEBUG_LEVEL(ENUM, STRING, COLOR) \
+	case ENUM:                       \
+		return COLOR;
+		DEBUG_LEVELS
+#undef DEBUG_LEVEL
+	}
+
+	return NULL;
+}
+
+void printDebug(FILE *file,
+                const DebugLevel level,
+                const char *const format,
+                ...)
+{
+#if DEBUG == 0
+	fprintf(file,
+	        "%s[%s]%s: ",
+	        debugLevelColor(level),
+	        debugLevelString(level),
+	        ANSI_RESET);
+
+	va_list args;
+	va_start(args, format);
+	vprintf(format, args);
+	va_end(args);
+#endif
 }

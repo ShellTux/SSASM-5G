@@ -62,6 +62,10 @@ int main(int argc, char **argv)
 	const char *const configFilepath = argv[1];
 
 	if (!isValidSystemManagerConfigFile(configFilepath)) {
+		printDebug(stderr,
+		           DEBUG_ERROR,
+		           "Invalid config file: \"%s\"\n",
+		           configFilepath);
 		exit(EXIT_FAILURE);
 	}
 

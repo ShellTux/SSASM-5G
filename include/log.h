@@ -27,17 +27,35 @@
 #include <stdio.h>
 
 #define ANSI_LENGTH 10
-#define RED         "\e[31m"
-#define GREEN       "\e[32m"
-#define BLUE        "\e[34m"
-#define CYAN        "\e[36m"
-#define YELLOW      "\e[33m"
-#define RESET       "\e[0m"
+#define ANSI_RED    "\e[31m"
+#define ANSI_GREEN  "\e[32m"
+#define ANSI_BLUE   "\e[34m"
+#define ANSI_CYAN   "\e[36m"
+#define ANSI_YELLOW "\e[33m"
+#define ANSI_RESET  "\e[0m"
 
 #define TIME_FORMAT  "%H:%M:%S"
 #define LOG_FILEPATH "system-manager.log"
 
+#define DEBUG_LEVELS                                       \
+	DEBUG_LEVEL(DEBUG_OK, "OK", ANSI_GREEN)            \
+	DEBUG_LEVEL(DEBUG_INFO, "INFO", ANSI_BLUE)         \
+	DEBUG_LEVEL(DEBUG_WARNING, "WARNING", ANSI_YELLOW) \
+	DEBUG_LEVEL(DEBUG_ERROR, "ERROR", ANSI_RED)
+
+typedef enum {
+#define DEBUG_LEVEL(ENUM, STRING, COLOR) ENUM,
+	DEBUG_LEVELS
+#undef DEBUG_LEVEL
+} DebugLevel;
+
 void openLogFile(void);
 void logMessage(const char *const format, ...);
+char *debugLevelString(const DebugLevel level);
+char *debugLevelColor(const DebugLevel level);
+void printDebug(FILE *file,
+                const DebugLevel level,
+                const char *const format,
+                ...);
 
 #endif // !SYSTEM_MANAGER_LOG_H

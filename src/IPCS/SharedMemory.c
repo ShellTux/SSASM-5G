@@ -24,6 +24,7 @@
 #include "IPCS/SharedMemory.h"
 
 #include "MobileUser.h"
+#include "log.h"
 #include "utils/error.h"
 
 #include <stddef.h>
@@ -42,6 +43,8 @@ int createSharedMemory(const size_t mobileUsers)
 		HANDLE_ERROR("shmget: ");
 	}
 
+	printDebug(stdout, DEBUG_OK, "Created Shared memory id: %d\n", shmid);
+
 	return shmid;
 }
 
@@ -50,4 +53,6 @@ void deleteSharedMemory(const int id)
 	if (shmctl(id, IPC_RMID, NULL) < 0) {
 		HANDLE_ERROR("shmctl: ");
 	}
+
+	printDebug(stdout, DEBUG_OK, "Deleted Shared memory id: %d\n", id);
 }

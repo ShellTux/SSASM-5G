@@ -67,10 +67,10 @@ _SOURCES = \
 	  utils/string
 5g_auth_platform: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-_SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command
+_SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command log
 backoffice_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
-_SOURCES = MobileUser AuthorizationRequest IPCS/MessageQueue
+_SOURCES = MobileUser AuthorizationRequest IPCS/MessageQueue log
 mobile_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target

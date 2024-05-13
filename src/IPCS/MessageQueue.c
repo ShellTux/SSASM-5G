@@ -23,9 +23,9 @@
 
 #include "IPCS/MessageQueue.h"
 
+#include "log.h"
 #include "utils/error.h"
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,6 +69,9 @@ int createMessageQueue(void)
 	    < 0) {
 		HANDLE_ERROR("msgget: ");
 	}
+
+	printDebug(stdout, DEBUG_OK, "Created Message queue id: %d\n", id);
+
 	return id;
 }
 
@@ -78,6 +81,9 @@ int openMessageQueue(void)
 	if ((id = msgget(ftok(MESSAGE_QUEUE_PATH, MESSAGE_QUEUE_ID), 0)) < 0) {
 		HANDLE_ERROR("msgget: ");
 	}
+
+	printDebug(stdout, DEBUG_OK, "Opened Message queue id: %d\n", id);
+
 	return id;
 }
 
@@ -86,4 +92,6 @@ void deleteMessageQueue(const int id)
 	if (msgctl(id, IPC_RMID, NULL) < 0) {
 		HANDLE_ERROR("msgctl: ");
 	}
+
+	printDebug(stdout, DEBUG_OK, "Deleted Message queue id: %d\n", id);
 }
