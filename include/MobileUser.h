@@ -69,6 +69,7 @@ void sendMessage(const AuthorizationRequest request);
 void sigintHandler(const int signal);
 void listenToMessageAlerts(void);
 void sendDataServiceRequests(const MobileUser mobileUser);
+void testParseAuthorizationRequest(const MobileUser mobileUser);
 void cleanup(void);
 
 #endif // !MOBILE_USER_H
