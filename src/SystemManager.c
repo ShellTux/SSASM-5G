@@ -89,7 +89,8 @@ int main(int argc, char **argv)
 	sharedStatsID  = createSharedMemory(sizeof(Statistics), false);
 	messageQueueID = createMessageQueue();
 
-	FORK_FUNCTION(authorizationRequestsManager);
+	FORK_FUNCTION(authorizationRequestsManager,
+	              systemManagerConfig.options.authServersMax);
 	FORK_FUNCTION(monitorEngine);
 
 	int status;
