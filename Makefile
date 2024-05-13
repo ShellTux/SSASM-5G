@@ -23,7 +23,7 @@ CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
 LINKS   =
 
-CCACHE_EXISTS := $(shell ccache -V)
+CCACHE_EXISTS := $(shell command -v ccache)
 ifdef CCACHE_EXISTS
 	CC        := ccache $(CC)
 	CXX       := ccache $(CXX)
