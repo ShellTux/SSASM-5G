@@ -33,6 +33,7 @@
 #include "utils/fork.h"
 
 #include <sched.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,8 +44,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int shmid;
-int msqid;
+int messageQueueID;
+int sharedMobileUsersID;
+int sharedStatsID;
 
 int main(int argc, char **argv)
 {
@@ -77,8 +79,13 @@ int main(int argc, char **argv)
 
 	logMessage(LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
-	shmid = createSharedMemory(systemManagerConfig.options.mobileUsers);
-	msqid = createMessageQueue();
+	signal(SIGINT, listenForSignals);
+
+	sharedMobileUsersID = createSharedMemory(
+	    systemManagerConfig.options.mobileUsers * sizeof(MobileUserRecord),
+	    true);
+	sharedStatsID  = createSharedMemory(sizeof(Statistics), false);
+	messageQueueID = createMessageQueue();
 
 	FORK_FUNCTION(authorizationRequestsManager);
 	FORK_FUNCTION(monitorEngine);
@@ -86,9 +93,9 @@ int main(int argc, char **argv)
 	int status;
 	while ((wait(&status)) > 0) {}
 
-	cleanResources();
-
 	logMessage(LOG_SIMULATOR_END);
+
+	cleanResources();
 
 	return EXIT_SUCCESS;
 }
@@ -104,6 +111,22 @@ void usage(const char *const programName)
 
 void cleanResources(void)
 {
-	deleteSharedMemory(shmid);
-	deleteMessageQueue(msqid);
+	deleteSharedMemory(sharedStatsID);
+	deleteSharedMemory(sharedMobileUsersID);
+	deleteMessageQueue(messageQueueID);
+}
+
+void listenForSignals(const int ansiSignal)
+{
+	signal(ansiSignal, SIG_IGN);
+
+	switch (ansiSignal) {
+	case SIGINT: {
+		cleanResources();
+		logMessage(LOG_SIMULATOR_END);
+		exit(EXIT_SUCCESS);
+	} break;
+	}
+
+	signal(ansiSignal, listenForSignals);
 }

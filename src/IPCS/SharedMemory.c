@@ -23,29 +23,98 @@
 
 #include "IPCS/SharedMemory.h"
 
-#include "MobileUser.h"
 #include "log.h"
 #include "utils/error.h"
 
+#include <errno.h>
+#include <fcntl.h>
+#include <semaphore.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-int createSharedMemory(const size_t mobileUsers)
+const char *const SHARED_MEMORY_MUTEX = "shared-memory-mutex";
+sem_t *sharedMemoryMutex              = NULL;
+
+static void initSharedMemoryMutex(void)
+{
+	if (sharedMemoryMutex != NULL) {
+		printDebug(stdout,
+		           DEBUG_WARNING,
+		           "Shared memory mutex already created\n");
+		return;
+	}
+
+	if (sem_unlink(SHARED_MEMORY_MUTEX) < 0) {
+		if (errno != ENOENT) {
+			HANDLE_ERROR("sem_unlink: ");
+		}
+	}
+
+	sem_unlink(SHARED_MEMORY_MUTEX);
+
+	if ((sharedMemoryMutex = sem_open(SHARED_MEMORY_MUTEX,
+	                                  O_CREAT | O_EXCL,
+	                                  SHARED_MEMORY_PERMISSIONS,
+	                                  1))
+	    == SEM_FAILED) {
+		HANDLE_ERROR("sem_open: ");
+	}
+
+	printDebug(stdout,
+	           DEBUG_OK,
+	           "Created Shared memory mutex: %s\n",
+	           SHARED_MEMORY_MUTEX);
+}
+
+int createSharedMemory(const size_t size, const bool zeroFill)
 {
 	int shmid;
-	if ((shmid = shmget(SHARED_MEMORY_KEY,
-	                    sizeof(MobileUser) * mobileUsers,
+
+	initSharedMemoryMutex();
+
+	if ((shmid = shmget(IPC_PRIVATE,
+	                    size,
 	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
 	    < 0) {
 		HANDLE_ERROR("shmget: ");
 	}
 
+	if (zeroFill) {
+		detachSharedMemory(memset(attachSharedMemory(shmid), 0, size));
+		printDebug(stdout,
+		           DEBUG_INFO,
+		           "Zero-filled Shared memory id: %d\n",
+		           shmid);
+	}
+
 	printDebug(stdout, DEBUG_OK, "Created Shared memory id: %d\n", shmid);
 
 	return shmid;
+}
+
+void *attachSharedMemory(const int id)
+{
+	void *const shm = shmat(id, NULL, 0);
+
+	if (shm == NULL) {
+		HANDLE_ERROR("shmat: ");
+	}
+
+	printDebug(stdout, DEBUG_OK, "Attached Shared memory id: %d\n", id);
+
+	return shm;
+}
+
+void detachSharedMemory(const void *sharedMemoryPointer)
+{
+	if (shmdt(sharedMemoryPointer) < 0) {
+		HANDLE_ERROR("shmdt: ");
+	}
 }
 
 void deleteSharedMemory(const int id)

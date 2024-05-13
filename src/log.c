@@ -84,6 +84,17 @@ void openLogFile(void)
 	}
 }
 
+void closeLogFile(void)
+{
+	if (logFile == NULL) {
+		return;
+	}
+
+	fclose(logFile);
+
+	printDebug(stdout, DEBUG_INFO, "Closed log file\n");
+}
+
 char *debugLevelString(const DebugLevel level)
 {
 	switch (level) {

@@ -31,5 +31,6 @@
 
 void usage(const char *const programName);
 void cleanResources(void);
+void listenForSignals(const int ansiSignal);
 
 #endif // !SYSTEM_MANAGER_H
