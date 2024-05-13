@@ -126,7 +126,10 @@ void dataStatsCommand(const size_t id)
 }
 
 void resetCommand(const size_t id)
-{
+{	Message msg; 
+	msg.messageType = RESET_MESSAGE;
+	strcpy(msg.message, "RESET"); 
+	msgsnd(messageQueueID, &msg, sizeof(msg)-sizeof(long), RESET_MESSAGE);
 	printf("reset: %zu\n", id);
 }
 

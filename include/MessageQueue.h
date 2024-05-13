@@ -45,11 +45,19 @@ typedef struct {
 	long messageType;
 
 	Statistics stats;
-} Message;
+} StatisticsMessage;
+
+typedef struct 
+{
+	long messageType;
+	char message[30] ; 
+}Message;
+
 
 typedef enum {
 	ALERT_MESSAGE = 1,
 	STATISTICS_MESSAGE,
+	RESET_MESSAGE,
 } MessageType;
 
 int createMessageQueue(void);
