@@ -31,6 +31,12 @@
 
 #define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
 	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
+#define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_EXIT \
+	"PROCESS AUTHORIZATION_REQUEST_MANAGER EXITING..."
+#define AUTHORIZATION_REQUESTS_MANAGER_CLEAN_RESOURCES_START \
+	"CLEANING AUTHORIZATION REQUESTS MANAGER RESOURCES STARTING..."
+#define AUTHORIZATION_REQUESTS_MANAGER_CLEAN_RESOURCES_END \
+	"CLEANING AUTHORIZATION REQUESTS MANAGER RESOURCES ENDING..."
 
 #define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
 #define LOG_THREAD_EXIT(WHO)    "THREAD " #WHO " EXITING..."
@@ -40,7 +46,7 @@ typedef struct {
 	size_t size;
 } AuthorizationEngines;
 
-void authorizationRequestsManager(void);
+void authorizationRequestsManager(const size_t authServersMax);
 AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers);
 void *receiverThread(void *argument);
 void *senderThread(void *argument);

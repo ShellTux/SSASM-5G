@@ -1,5 +1,5 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
+#ifndef SSASM_5G_UTILS_MATH_H
+#define SSASM_5G_UTILS_MATH_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -24,12 +24,7 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#define MAX(A, B) (((A) > (B)) ? (A) : (B))
+#define MIN(A, B) (((A) < (B)) ? (A) : (B))
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
-
-void usage(const char *const programName);
-void cleanResources(void);
-
-#endif // !SYSTEM_MANAGER_H
+#endif // !SSASM_5G_UTILS_MATH_H
