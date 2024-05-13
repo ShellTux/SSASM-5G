@@ -94,13 +94,14 @@ void sigintHandler(const int signal)
 
 void sendMessage(const AuthorizationRequest request)
 {
-	char buffer[1025] = {0};
-	sprintf(buffer,
-	        AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND,
-	        request.mobileUserID,
-	        serviceString(request.service),
-	        request.reservingData);
-	write(userPipeFD, buffer, sizeof(buffer));
+	char buffer[PIPE_BUFFER_SIZE + 1] = {0};
+	snprintf(buffer,
+	         PIPE_BUFFER_SIZE,
+	         AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND,
+	         request.mobileUserID,
+	         serviceString(request.service),
+	         request.reservingData);
+	write(userPipeFD, buffer, strnlen(buffer, PIPE_BUFFER_SIZE));
 }
 
 MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
@@ -196,6 +197,26 @@ void sendDataServiceRequests(const MobileUser mobileUser)
 	    .service       = ENUM,                            \
 	});                                                   \
 	authorizationRequests++;
+		SERVICES
+#undef SERVICE
+		break;
+	}
+}
+
+void testParseAuthorizationRequest(const MobileUser mobileUser)
+{
+	for (size_t authorizationRequests = 0;
+	     authorizationRequests < mobileUser.options.numPedidos;
+	     ++authorizationRequests) {
+		char buffer[PIPE_BUFFER_SIZE + 1] = {0};
+#define SERVICE(ENUM, STRING)                               \
+	snprintf(buffer,                                    \
+	         PIPE_BUFFER_SIZE,                          \
+	         AUTHORIZATION_REQUEST_MESSAGE_FORMAT_SEND, \
+	         mobileUser.options.userID,                 \
+	         serviceString(ENUM),                       \
+	         mobileUser.options.reservedData);          \
+	printAuthorizationRequest(stdout, parseAuthorizationRequest(buffer));
 		SERVICES
 #undef SERVICE
 	}

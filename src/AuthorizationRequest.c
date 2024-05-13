@@ -23,6 +23,8 @@
 
 #include "AuthorizationRequest.h"
 
+#include "log.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +47,7 @@ AuthorizationRequest parseAuthorizationRequest(const char *const string)
 	ServiceOptional service = parseService(token);
 
 	if (!service.valid) {
+		printDebug(stdout, DEBUG_WARNING, "Invalid service!\n");
 		free(cloneString);
 		return invalidRequest;
 	}
