@@ -28,6 +28,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * Converte uma string contendo um pedido de autorização em uma estrutura AuthorizationRequest
+ * @param string a string contendo o pedido de autorização
+ * @return um objeto AuthorizationRequest, inicializado a 0s em caso de a string ser inválida
+ */
+
 AuthorizationRequest parseAuthorizationRequest(const char *const string)
 {
 	static const AuthorizationRequest invalidRequest = {0};
@@ -58,6 +64,11 @@ AuthorizationRequest parseAuthorizationRequest(const char *const string)
 
 	return request;
 }
+/**
+ * Imprime os detalhes do pedido de autorização em um ficheiro
+ * @param file o ficheiro onde os detalhes serão impressos
+ * @param request o pedido de autorização a ser impresso
+ */
 
 void printAuthorizationRequest(FILE *file, const AuthorizationRequest request)
 {
@@ -82,6 +93,11 @@ const char *serviceString(const Service service)
 
 	return NULL;
 }
+/**
+ * Converte uma string representando um serviço em um valor do tipo Service
+ * @param string a string representando o serviço
+ * @return uma estrutura ServiceOptional
+ */
 
 ServiceOptional parseService(const char *const string)
 {

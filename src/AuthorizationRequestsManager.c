@@ -40,6 +40,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+/**
+ * Função principal responsável por gerenciar os pedidos de autorização, criar as threads receiver e sender 
+ * ...
+ */
 
 void authorizationRequestsManager(void)
 {
@@ -68,6 +72,10 @@ void authorizationRequestsManager(void)
 	int status;
 	while ((wait(&status)) > 0) {}
 }
+/**
+ * Thread responsável por receber os pedidos de autorização dos usuários
+ * @param argument não utilizado
+ */
 
 void *receiverThread(void *argument)
 {
@@ -106,6 +114,10 @@ void *receiverThread(void *argument)
 
 	pthread_exit(NULL);
 }
+/**
+ * Thread responsável por enviar os pedidos de autorização para os motores disponíveis
+ * @param argument não utilizado
+ */
 
 void *senderThread(void *argument)
 {
@@ -118,6 +130,12 @@ void *senderThread(void *argument)
 	logMessage(LOG_THREAD_EXIT(SENDER));
 	pthread_exit(NULL);
 }
+
+/**
+ * Cria as engines de autorização para lidar com os pedidos de autorização
+ * @param maxAuthServers o número máximo de engines de autorização
+ * @return as engines de autorização criadas
+ */
 
 AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers)
 {

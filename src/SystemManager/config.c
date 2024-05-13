@@ -29,6 +29,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+/**
+ * Verifica se o ficheiro de configuração do System Manager é válido
+ * @param configFilepath o caminho para o ficheiro de configuração
+ * @return true se o ficheiro for válido, false caso contrário
+ */
 
 bool isValidSystemManagerConfigFile(const char *const configFilepath)
 {
@@ -63,6 +68,11 @@ bool isValidSystemManagerConfigFile(const char *const configFilepath)
 
 	return isValid && lineCount == CONFIG_FILE_N_LINES;
 }
+/**
+ * Lê as configurações do System Manager de um ficheiro
+ * @param filepath o caminho para o ficheiro de configuração
+ * @return as configurações do System Manager lidas do ficheiro
+ */
 
 SystemManagerConfig systemManagerConfigFromFile(const char *const filepath)
 {
@@ -90,6 +100,11 @@ SystemManagerConfig systemManagerConfigFromFile(const char *const filepath)
 
 	return config;
 }
+/**
+ * Imprime as configurações do System Manager em um ficheiro
+ * @param file o ficheiro onde as configurações serão impressas
+ * @param config as configurações do System Manager a serem impressas
+ */
 
 void printSystemManagerConfig(FILE *file, const SystemManagerConfig config)
 {

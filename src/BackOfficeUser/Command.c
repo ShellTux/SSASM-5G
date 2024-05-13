@@ -26,7 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+/**
+ * Função que gera um token, com o comando presente na string
+ * @param string string com o comando a ser executado pelo backOffice
+* @return token com o comando
+*/
 Command parseCommand(char *const string)
 {
 	static const Command invalidCommand = {
@@ -59,7 +63,9 @@ Command parseCommand(char *const string)
 
 	return invalidCommand;
 }
-
+/**
+ * Em caso de comando inválido, imprime os comandos disponíveis
+*/
 void invalidCommand(void)
 {
 	printf("Invalid Command. Available commands are:\n");

@@ -31,7 +31,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-
+/**
+ * cria um named pipe
+ * @param name nome do pipe a ser criado 
+ * @param permissions As permissões a serem atribuídas ao pipe
+*/
 void createNamedPipe(const char *const name, const unsigned int permissions)
 {
 	if (mkfifo(name, O_CREAT | O_EXCL | permissions) < 0

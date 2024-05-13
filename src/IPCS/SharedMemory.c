@@ -40,6 +40,9 @@
 const char *const SHARED_MEMORY_MUTEX = "shared-memory-mutex";
 sem_t *sharedMemoryMutex              = NULL;
 
+/**
+ * Inicializa o mutex para a memória compartilhada.
+ */
 static void initSharedMemoryMutex(void)
 {
 	if (sharedMemoryMutex != NULL) {
@@ -70,7 +73,12 @@ static void initSharedMemoryMutex(void)
 	           "Created Shared memory mutex: %s\n",
 	           SHARED_MEMORY_MUTEX);
 }
-
+/**
+ * Cria uma região de memória compartilhada
+ * @param size      O tamanho da região de memória compartilhada
+ * @param zeroFill  Indica se a memória deve ser preenchida com zeros
+ * @return O identificador da região de memória compartilhada
+ */
 int createSharedMemory(const size_t size, const bool zeroFill)
 {
 	int shmid;
@@ -96,7 +104,11 @@ int createSharedMemory(const size_t size, const bool zeroFill)
 
 	return shmid;
 }
-
+/**
+ * Anexa uma região de memória compartilhada ao espaço de endereçamento do processo
+ * @param id O identificador da região de memória compartilhada
+ * @return Um ponteiro para a região de memória compartilhada
+ */
 void *attachSharedMemory(const int id)
 {
 	void *const shm = shmat(id, NULL, 0);
@@ -109,14 +121,20 @@ void *attachSharedMemory(const int id)
 
 	return shm;
 }
-
+/**
+ * Desanexa uma região de memória compartilhada do espaço de endereçamento do processo
+ * @param sharedMemoryPointer O ponteiro para a região de memória compartilhada
+ */
 void detachSharedMemory(const void *sharedMemoryPointer)
 {
 	if (shmdt(sharedMemoryPointer) < 0) {
 		HANDLE_ERROR("shmdt: ");
 	}
 }
-
+/**
+ * Deleta uma região de memória compartilhada
+ * @param id O identificador da região de memória compartilhada a ser deletada.
+ */
 void deleteSharedMemory(const int id)
 {
 	if (shmctl(id, IPC_RMID, NULL) < 0) {

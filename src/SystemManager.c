@@ -47,6 +47,9 @@
 int messageQueueID;
 int sharedMobileUsersID;
 int sharedStatsID;
+/**
+ * Função principal responsável pela inicialização do SystemManager e pela criação dos processos de AuthorizationRequestsManager e MonitorEngine
+ */
 
 int main(int argc, char **argv)
 {
@@ -99,6 +102,10 @@ int main(int argc, char **argv)
 
 	return EXIT_SUCCESS;
 }
+/**
+ * Imprime as instruções de uso do programa
+ * @param programName o nome do programa
+ */
 
 void usage(const char *const programName)
 {
@@ -108,6 +115,9 @@ void usage(const char *const programName)
 
 	exit(EXIT_FAILURE);
 }
+/**
+ * Limpa os recursos compartilhados utilizados pelo SystemManager.
+ */
 
 void cleanResources(void)
 {
@@ -116,6 +126,9 @@ void cleanResources(void)
 	deleteMessageQueue(messageQueueID);
 }
 
+/**
+ * Encerra corretamente o system manager, quando recebe um sinal 
+*/
 void listenForSignals(const int ansiSignal)
 {
 	signal(ansiSignal, SIG_IGN);

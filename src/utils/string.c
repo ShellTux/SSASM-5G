@@ -27,6 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/**
+ * Remove os espaços em branco do início e do fim de uma string
+ * @param string a string a ser aparada
+ * @return a string aparada
+ */
 
 char *trim(char *string)
 {

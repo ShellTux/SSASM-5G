@@ -42,6 +42,11 @@
 
 int userPipeFD;
 int messageQueueID;
+/**
+ * Função principal responsável pela inicialização do MobileUser e pelo envio de pedidos de serviço
+ * @param argc o número de argumentos de linha de comando
+ * @param argv um array de strings contendo os elementos para um pedido de serviço 
+ */
 
 int main(int argc, char *argv[])
 {
@@ -70,6 +75,10 @@ int main(int argc, char *argv[])
 
 	return EXIT_SUCCESS;
 }
+/**
+ * Imprime as instruções de uso do mobileUser
+ * @param programName o nome do programa
+ */
 
 void usage(const char *const programName)
 {
@@ -83,6 +92,10 @@ void usage(const char *const programName)
 	        "  -h, --help                   Print this usage message\n");
 	exit(EXIT_FAILURE);
 }
+/**
+ * Manipulador de sinal para SIGINT (Ctrl+C).
+ * @param signal o sinal recebido
+ */
 
 void sigintHandler(const int signal)
 {
@@ -91,6 +104,10 @@ void sigintHandler(const int signal)
 	cleanup();
 	exit(EXIT_SUCCESS);
 }
+/**
+ * Envia um pedido de autorização para o userPipe 
+ * @param request a solicitação de autorização a ser enviada
+ */
 
 void sendMessage(const AuthorizationRequest request)
 {
@@ -102,6 +119,12 @@ void sendMessage(const AuthorizationRequest request)
 	        request.reservingData);
 	write(userPipeFD, buffer, sizeof(buffer));
 }
+/**
+ * Cria um MobileUser a partir dos argumentos de linha de comando
+ * @param arguments um array de strings contendo os argumentos
+ * @param argumentsLength o número de argumentos
+ * @return o MobileUser criado
+ */
 
 MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
 {
@@ -130,12 +153,22 @@ MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
 
 	return isMobileUserValid(mobileUser) ? mobileUser : invalidMobileUser;
 }
+/**
+ * Verifica se um MobileUser é válido.
+ * @param mobileUser o MobileUser a ser verificado
+ * @return true se o MobileUser for válido, false caso contrário
+ */
 
 bool isMobileUserValid(const MobileUser mobileUser)
 {
 	(void) mobileUser;
 	return true;
 }
+/**
+ * Imprime as informações de um MobileUser em um ficheiro
+ * @param file o ficheiro onde as informações serão impressas
+ * @param mobileUser o MobileUser cujas informações serão impressas
+ */
 
 void printMobileUser(FILE *file, const MobileUser mobileUser)
 {
@@ -149,6 +182,9 @@ void printMobileUser(FILE *file, const MobileUser mobileUser)
 	        mobileUser.options.reservedData,
 	        mobileUser.options.userID);
 }
+/**
+ * Escuta por alertas de mensagem na fila de mensagens e imprime os alertas recebidos.
+ */
 
 void listenToMessageAlerts(void)
 {
@@ -180,6 +216,10 @@ void listenToMessageAlerts(void)
 		}
 	}
 }
+/**
+ * Envia os pedidos de autorização com base nas opções do MobileUser
+ * @param mobileUser o MobileUser que faz o pedido de autorização 
+ */
 
 void sendDataServiceRequests(const MobileUser mobileUser)
 {

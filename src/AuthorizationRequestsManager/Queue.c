@@ -27,7 +27,11 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-
+/**
+ * Cria uma fila com o tamanho especificado.
+ * @param size o tamanho da fila a ser criada
+ * @return a fila criada
+ */
 Queue createQueue(const size_t size)
 {
 	static const Queue invalidQueue = {0};
