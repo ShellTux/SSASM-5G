@@ -48,6 +48,8 @@ int messageQueueID;
 int sharedMobileUsersID;
 int sharedStatsID;
 
+static void listenForSignals(const int ansiSignal);
+
 int main(int argc, char **argv)
 {
 	for (int i = 0; i < argc; ++i) {
