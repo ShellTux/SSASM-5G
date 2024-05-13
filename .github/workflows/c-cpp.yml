@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: make
+    - name: Compilation
       run: make --jobs=4 --output-sync=target
+    - name: Check License in source and header files
+      run: make check

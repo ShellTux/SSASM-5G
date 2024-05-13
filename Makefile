@@ -53,6 +53,18 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 format:
 	clang-format -i $(SOURCES) $(HEADERS)
 
+.PHONY: check
+check:
+	@printf '%s\n' 'Files without License Header:'
+	@! grep \
+		--color=always \
+		--fixed-strings \
+		--files-without-match \
+		--word-regexp \
+		--file=assets/license-author-header.h \
+		$(SOURCES) $(HEADERS) \
+		| grep '^'
+
 _SOURCES = \
 	  AuthorizationEngine \
 	  AuthorizationRequest \
