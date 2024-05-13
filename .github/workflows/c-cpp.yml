@@ -2,7 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
+      - "**"
   pull_request:
     branches: [ "main" ]
 
@@ -13,5 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: make
-      run: make
+    - name: Compilation
+      run: make --jobs=4 --output-sync=target
+    - name: Check License in source and header files
+      run: make check

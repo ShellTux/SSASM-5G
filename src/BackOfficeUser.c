@@ -23,22 +23,97 @@
 
 #include "BackOfficeUser.h"
 
-#include "MessageQueue.h"
+#include "BackOfficeUser/Command.h"
+#include "IPCS/MessageQueue.h"
+#include "IPCS/Pipes.h"
+#include "utils/error.h"
 
+#include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/msg.h>
+#include <unistd.h>
 
 int messageQueueID;
+int backPipeFD;
 
 int main()
 {
 	signal(SIGINT, sigintHandler);
-	messageQueueID = createMessageQueue();
 
+	if ((backPipeFD = open(BACK_PIPE, O_RDWR)) < 0) {
+		HANDLE_ERROR("open: " BACK_PIPE);
+	}
+
+	// TODO: get message queue id
+
+
+	return EXIT_SUCCESS;
+}
+
+void executeCommand(const Command command)
+{
+	char message[MESSAGE_MAX + 1] = {0};
+
+	char *commandString = NULL;
+
+	switch (command.command) {
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	case ENUM: {                                  \
+		commandString = #COMMAND;             \
+	} break;
+		COMMANDS
+#undef COMMAND
+	case INVALID_COMMAND:
+	default: {
+		invalidCommand();
+	}
+		return;
+	}
+
+	if (commandString == NULL) {
+		return;
+	}
+
+	snprintf(message,
+	         MESSAGE_MAX,
+	         MESSAGE_FORMAT,
+	         command.backofficeID,
+	         commandString);
+
+	if (write(backPipeFD, message, strnlen(message, MESSAGE_MAX)) < 0) {
+		HANDLE_ERROR("write: ");
+	}
+}
+
+void sigintHandler(const int signal)
+{
+	(void) signal;
+	printf(SIGINT_MESSAGE);
+	close(backPipeFD);
+	exit(EXIT_SUCCESS);
+}
+
+void listenForMessages(void)
+{
+	Message message;
+
+	while (true) {
+		msgrcv(messageQueueID,
+		       &message,
+		       MESSAGE_SIZE,
+		       STATISTICS_MESSAGE_TYPE,
+		       0);
+		printStatistics(stdout, message.stats);
+	}
+}
+
+void listenForCommands(void)
+{
 	while (true) {
 		printf(PROMPT);
 
@@ -47,112 +122,6 @@ int main()
 			break;
 		}
 
-		const Command command = processCommand(commandString);
-		switch (command.command) {
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
-	case ENUM:                                    \
-		FUNCTION(command.id);                 \
-		break;
-			COMMANDS
-#undef WRAPPER
-		case INVALID_COMMAND:
-		default:
-			invalidCommand();
-			break;
-		}
+		executeCommand(parseCommand(commandString));
 	}
-
-	return EXIT_SUCCESS;
-}
-
-void sigintHandler(const int signal)
-{
-	(void) signal;
-	printf(SIGINT_MESSAGE);
-	exit(EXIT_SUCCESS);
-}
-
-Command processCommand(char *const string)
-{
-	static const Command invalidCommand = {
-	    .id      = 0,
-	    .command = INVALID_COMMAND,
-	};
-
-	Command command = invalidCommand;
-
-	// NOTE: strtok is not thread safe
-	char *token = strtok(string, COMMAND_DELIMITER);
-	if (token == NULL) {
-		return invalidCommand;
-	}
-
-	command.id = atoi(token);
-
-	token = strtok(NULL, COMMAND_DELIMITER);
-	if (token == NULL) {
-		return invalidCommand;
-	}
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
-	else if (strncmp(token, #COMMAND, COMMAND_MAX) == 0) \
-	{                                                    \
-		command.command = ENUM;                      \
-		return command;                              \
-	}
-	COMMANDS
-#undef WRAPPER
-
-	return invalidCommand;
-}
-
-void invalidCommand(void)
-{
-	printf("Invalid Command. Available commands are:\n");
-#define WRAPPER(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
-	printf("  - %s: %s\n", #COMMAND, DESCRIPTION);
-	COMMANDS
-#undef WRAPPER
-}
-
-void dataStatsCommand(const size_t id)
-{
-	Statistics stats;
-	msgrcv(messageQueueID,
-	       &stats,
-	       sizeof(stats) - sizeof(long),
-	       STATISTICS_MESSAGE,
-	       0);
-	printStats(stdout, stats);
-}
-
-void resetCommand(const size_t id)
-{	Message msg; 
-	msg.messageType = RESET_MESSAGE;
-	strcpy(msg.message, "RESET"); 
-	msgsnd(messageQueueID, &msg, sizeof(msg)-sizeof(long), RESET_MESSAGE);
-	printf("reset: %zu\n", id);
-}
-
-void printStats(FILE *file, Statistics stats)
-{
-	fprintf(file,
-	        "%-10s %-10s %-10s\n",
-	        "SERVICE",
-	        "Total Data",
-	        "Auth Reqs");
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "VIDEO",
-	        stats.video.totalData,
-	        stats.video.authReqs);
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "MUSIC",
-	        stats.music.totalData,
-	        stats.music.authReqs);
-	fprintf(file,
-	        "%-10s %-10zu %-10zu\n",
-	        "SOCIAL",
-	        stats.social.totalData,
-	        stats.social.authReqs);
 }

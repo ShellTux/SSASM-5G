@@ -8,6 +8,10 @@ HEADERS  = $(shell find $(INCLUDE_DIR) \
 	   -name "*.h" -o \
 	   -name "*.hpp" \
 	   2>/dev/null | tr '\n' ' ')
+SOURCES  = $(shell find $(SRC_DIR) \
+	   -name "*.c" -o \
+	   -name "*.cpp" \
+	   2>/dev/null | tr '\n' ' ')
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror
@@ -18,6 +22,12 @@ CFLAGS += -fdiagnostics-color=always
 CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
 LINKS   =
+
+CCACHE_EXISTS := $(shell ccache -V)
+ifdef CCACHE_EXISTS
+	CC        := ccache $(CC)
+	CXX       := ccache $(CXX)
+endif
 
 ifneq ($(shell command -v batcat 2>/dev/null),)
 	BAT = batcat
@@ -39,14 +49,41 @@ $(OBJ_DIR)/%.c.o: %.c $(HEADERS)
 	mkdir --parents `dirname "$@"`
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SOURCES = SystemManager SystemManager/config AuthorizationRequestsManager MonitorEngine log utils/string AuthorizationRequest
-5g_auth_platform: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+.PHONY: format
+format:
+	clang-format -i $(SOURCES) $(HEADERS)
 
-SOURCES = BackOfficeUser MessageQueue
-backoffice_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+.PHONY: check
+check:
+	@printf '%s\n' 'Files without License Header:'
+	@! grep \
+		--color=always \
+		--fixed-strings \
+		--files-without-match \
+		--word-regexp \
+		--file=assets/license-author-header.h \
+		$(SOURCES) $(HEADERS) \
+		| grep '^'
 
-SOURCES = MobileUser AuthorizationRequest
-mobile_user: $(SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+_SOURCES = \
+	  AuthorizationEngine \
+	  AuthorizationRequest \
+	  AuthorizationRequestsManager \
+	  IPCS/MessageQueue \
+	  IPCS/Pipes \
+	  IPCS/SharedMemory \
+	  log \
+	  MonitorEngine \
+	  SystemManager \
+	  SystemManager/config \
+	  utils/string
+5g_auth_platform: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+
+_SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command log
+backoffice_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+
+_SOURCES = MobileUser AuthorizationRequest IPCS/MessageQueue log
+mobile_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
 
 $(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target
 $(TARGETS): %:
@@ -115,8 +152,9 @@ warning:
 		&& exit 1 \
 		|| true
 
+.PHONY: explore
 explore:
 	find $(SRC_DIR) $(INCLUDE_DIR) -type f -name "*.[ch]" \
 		| fzf --preview "$(BAT) --color=always --style=numbers {}" \
-		--bind='enter:execute($(BAT) {})+clear-query' \
+		--bind='enter:execute($(BAT) --paging=always {})+clear-query' \
 		--preview-window=right:70% || true

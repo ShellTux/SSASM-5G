@@ -1,6 +1,3 @@
-#ifndef BACK_OFFICE_USER_H
-#define BACK_OFFICE_USER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -25,21 +22,49 @@
  ***************************************************************************/
 
 #include "BackOfficeUser/Command.h"
-#include "IPCS/MessageQueue.h"
-#include "IPCS/Pipes.h"
 
-#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define AUTHORIZATION_REQUEST_MANAGER_PIPE BACK_PIPE
-#define SIGINT_MESSAGE                     "Received SIGINT. Exiting...\n"
-#define PROMPT                             "> "
-#define MESSAGE_MAX                        32
-#define MESSAGE_FORMAT                     "%zu#%s"
+Command parseCommand(char *const string)
+{
+	static const Command invalidCommand = {
+	    .backofficeID = 0,
+	    .command      = INVALID_COMMAND,
+	};
 
-void sigintHandler(const int signal);
-void executeCommand(const Command command);
-void listenForMessages(void);
-void listenForCommands(void);
+	Command command = invalidCommand;
 
-#endif // !BACK_OFFICE_USER_H
+	// NOTE: strtok is not thread safe
+	char *token = strtok(string, COMMAND_DELIMITER);
+	if (token == NULL) {
+		return invalidCommand;
+	}
+
+	command.backofficeID = atoi(token);
+
+	token = strtok(NULL, COMMAND_DELIMITER);
+	if (token == NULL) {
+		return invalidCommand;
+	}
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION)        \
+	else if (strncmp(token, #COMMAND, COMMAND_MAX) == 0) \
+	{                                                    \
+		command.command = ENUM;                      \
+		return command;                              \
+	}
+	COMMANDS
+#undef COMMAND
+
+	return invalidCommand;
+}
+
+void invalidCommand(void)
+{
+	printf("Invalid Command. Available commands are:\n");
+#define COMMAND(ENUM, FUNCTION, COMMAND, DESCRIPTION) \
+	printf("  - %s: %s\n", #COMMAND, DESCRIPTION);
+	COMMANDS
+#undef COMMAND
+}

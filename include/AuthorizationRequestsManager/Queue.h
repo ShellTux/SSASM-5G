@@ -1,3 +1,6 @@
+#ifndef SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
+#define SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H
+
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -21,21 +24,17 @@
  *
  ***************************************************************************/
 
-#include "MessageQueue.h"
+#include "AuthorizationRequest.h"
 
-#include <assert.h>
 #include <stddef.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 
-int createMessageQueue(void)
-{
-	int id;
-	assert((id = msgget(IPC_PRIVATE, IPC_CREAT | 0700)) != -1);
-	return id;
-}
+typedef struct {
+	int writePos, readPos;
+	AuthorizationRequest *data;
+	size_t size;
+} Queue;
 
-void deleteMessageQueue(const int id)
-{
-	msgctl(id, IPC_RMID, NULL);
-}
+Queue createQueue(const size_t size);
+void destroyQueue(Queue *queue);
+
+#endif // !SSASM_5G_AUTHORIZATION_REQUESTS_MANAGER_QUEUE_H

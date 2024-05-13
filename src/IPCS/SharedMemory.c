@@ -1,6 +1,3 @@
-#ifndef SYSTEM_MANAGER_H
-#define SYSTEM_MANAGER_H
-
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
  *                 / ___/ ___|  / \  / ___||  \/  |    | ___| / ___|
@@ -24,12 +21,38 @@
  *
  ***************************************************************************/
 
-#define LOG_SYSTEM_MANAGER_PROCESS_CREATED "PROCESS SYSTEM_MANAGER CREATED"
+#include "IPCS/SharedMemory.h"
 
-#define LOG_SIMULATOR_START "5G_AUTH_PLATFORM SIMULATOR STARTING"
-#define LOG_SIMULATOR_END   "5G_AUTH_PLATFORM SIMULATOR CLOSING"
+#include "MobileUser.h"
+#include "log.h"
+#include "utils/error.h"
 
-void usage(const char *const programName);
-void cleanResources(void);
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
-#endif // !SYSTEM_MANAGER_H
+int createSharedMemory(const size_t mobileUsers)
+{
+	int shmid;
+	if ((shmid = shmget(SHARED_MEMORY_KEY,
+	                    sizeof(MobileUser) * mobileUsers,
+	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
+	    < 0) {
+		HANDLE_ERROR("shmget: ");
+	}
+
+	printDebug(stdout, DEBUG_OK, "Created Shared memory id: %d\n", shmid);
+
+	return shmid;
+}
+
+void deleteSharedMemory(const int id)
+{
+	if (shmctl(id, IPC_RMID, NULL) < 0) {
+		HANDLE_ERROR("shmctl: ");
+	}
+
+	printDebug(stdout, DEBUG_OK, "Deleted Shared memory id: %d\n", id);
+}

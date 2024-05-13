@@ -23,16 +23,16 @@
 
 #include "AuthorizationRequest.h"
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-AuthorizationRequest
-createAuthorizationRequestFromString(const char *const string)
+AuthorizationRequest parseAuthorizationRequest(const char *const string)
 {
-	AuthorizationRequest request = {0};
+	static const AuthorizationRequest invalidRequest = {0};
+
+	AuthorizationRequest request = invalidRequest;
 
 	char *cloneString = strdup(string);
 
@@ -41,7 +41,15 @@ createAuthorizationRequestFromString(const char *const string)
 	request.mobileUserID = atoi(token);
 
 	token = strtok(NULL, AUTHORIZATION_REQUEST_MESSAGE_DELIMITERS);
-	request.service = serviceFromString(token);
+
+	ServiceOptional service = parseService(token);
+
+	if (!service.valid) {
+		free(cloneString);
+		return invalidRequest;
+	}
+
+	request.service = service.service;
 
 	token = strtok(NULL, AUTHORIZATION_REQUEST_MESSAGE_DELIMITERS);
 	request.reservingData = atoi(token);
@@ -57,37 +65,35 @@ void printAuthorizationRequest(FILE *file, const AuthorizationRequest request)
 	        AUTHORIZATION_REQUEST_PRINT_FORMAT "\n",
 	        request.mobileUserID,
 	        serviceString(request.service),
-	        request.reservingData);
+	        request.reservingData,
+	        request.requestTime);
 }
 
 const char *serviceString(const Service service)
 {
 	switch (service) {
-#define WRAPPER(ENUM)         \
+#define SERVICE(ENUM, STRING) \
 	case ENUM: {          \
 		return #ENUM; \
 	};
 		SERVICES
-#undef WRAPPER
+#undef SERVICE
 	}
 
 	return NULL;
 }
 
-Service serviceFromString(const char *const string)
+ServiceOptional parseService(const char *const string)
 {
-	Service service;
-
-	bool found = false;
-#define WRAPPER(ENUM)                     \
-	if (strcmp(#ENUM, string) == 0) { \
-		found   = true;           \
-		service = ENUM;           \
+#define SERVICE(ENUM, STRING)                                             \
+	if (strcmp(STRING, string) == 0) {                                \
+		return (ServiceOptional){.valid = true, .service = ENUM}; \
 	}
 	SERVICES
-#undef WRAPPER
+#undef SERVICE
 
-	assert(found && "Error parsing Service from String");
-
-	return service;
+	return (ServiceOptional){
+	    .valid   = false,
+	    .service = 0,
+	};
 }

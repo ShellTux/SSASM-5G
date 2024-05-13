@@ -24,17 +24,24 @@
  *
  ***************************************************************************/
 
+#include "AuthorizationEngine.h"
+#include "AuthorizationRequestsManager/Queue.h"
+
+#include <stddef.h>
+
 #define LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED \
 	"PROCESS AUTHORIZATION_REQUEST_MANAGER CREATED"
 
 #define LOG_THREAD_CREATED(WHO) "THREAD " #WHO " CREATED"
+#define LOG_THREAD_EXIT(WHO)    "THREAD " #WHO " EXITING..."
 
-#define USER_PIPE             "/tmp/user-pipe.fifo"
-#define USER_PIPE_PERMISSIONS 0600
-#define BACK_PIPE             "/tmp/back-pipe.fifo"
-#define BACK_PIPE_PERMISSIONS 0600
+typedef struct {
+	AuthorizationEngine *engines;
+	size_t size;
+} AuthorizationEngines;
 
-void authorizationRequestsManager(const int sharedMemoryID);
+void authorizationRequestsManager(void);
+AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers);
 void *receiverThread(void *argument);
 void *senderThread(void *argument);
 

@@ -23,12 +23,14 @@
 
 #include "AuthorizationRequestsManager.h"
 
+#include "AuthorizationEngine.h"
 #include "AuthorizationRequest.h"
+#include "IPCS/Pipes.h"
 #include "log.h"
 #include "utils/error.h"
+#include "utils/fork.h"
 
 #include <bits/pthreadtypes.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -36,21 +38,15 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-void authorizationRequestsManager(const int sharedMemoryID)
+void authorizationRequestsManager(void)
 {
 	logMessage(LOG_AUTHORIZATION_REQUESTS_MANAGER_PROCESS_CREATED);
 
-	if (mkfifo(USER_PIPE, O_CREAT | O_EXCL | USER_PIPE_PERMISSIONS) < 0
-	    && (errno != EEXIST)) {
-		perror("mkfifo: ");
-	}
-
-	if (mkfifo(BACK_PIPE, O_CREAT | O_EXCL | BACK_PIPE_PERMISSIONS) < 0
-	    && (errno != EEXIST)) {
-		perror("mkfifo: ");
-	}
+	createNamedPipe(USER_PIPE, USER_PIPE_PERMISSIONS);
+	createNamedPipe(BACK_PIPE, BACK_PIPE_PERMISSIONS);
 
 	pthread_t threads[2];
 
@@ -66,42 +62,47 @@ void authorizationRequestsManager(const int sharedMemoryID)
 #undef receiver
 #undef sender
 
-	sleep(1);
-
-	char *sharedMemory;
-	if ((sharedMemory = shmat(sharedMemoryID, NULL, 0)) == (char *) -1) {
-		perror("IPC error: shmat");
-		exit(EXIT_FAILURE);
-	}
-
-	sleep(3);
-
-	if (shmdt(sharedMemory) == -1) {
-		perror("IPC error: shmdt");
-		exit(EXIT_FAILURE);
-	}
-
-	sleep(1);
-
 	unlink(USER_PIPE);
 	unlink(BACK_PIPE);
+
+	int status;
+	while ((wait(&status)) > 0) {}
 }
 
 void *receiverThread(void *argument)
 {
 	(void) argument;
+
 	logMessage(LOG_THREAD_CREATED(RECEIVER));
 
+#define RECEIVER_THREAD_WIP 1
+
 	int userPipeFD;
+#if RECEIVER_THREAD_WIP
+	if ((userPipeFD = open(USER_PIPE, O_RDONLY | O_NONBLOCK)) < 0) {
+#else
 	if ((userPipeFD = open(USER_PIPE, O_RDONLY)) < 0) {
+#endif
 		HANDLE_ERROR("open: ");
 	}
 
-	char buffer[4097] = {0};
-	read(userPipeFD, buffer, 4096);
-	AuthorizationRequest request
-	    = createAuthorizationRequestFromString(buffer);
-	printAuthorizationRequest(stdout, request);
+	int backPipeFD;
+#if RECEIVER_THREAD_WIP
+	if ((backPipeFD = open(BACK_PIPE, O_RDONLY | O_NONBLOCK)) < 0) {
+#else
+	if ((backPipeFD = open(BACK_PIPE, O_RDONLY)) < 0) {
+#endif
+		HANDLE_ERROR("open: ");
+	}
+
+#undef RECEIVER_THREAD_WIP
+
+	// TODO: Parse the message from the pipe and send it to the queues
+
+	close(userPipeFD);
+	close(backPipeFD);
+
+	logMessage(LOG_THREAD_EXIT(RECEIVER));
 
 	pthread_exit(NULL);
 }
@@ -110,5 +111,32 @@ void *senderThread(void *argument)
 {
 	(void) argument;
 	logMessage(LOG_THREAD_CREATED(SENDER));
+
+	// TODO: Read Authorization Request from queues and deliver in an
+	// available AuthorizationEngine
+
+	logMessage(LOG_THREAD_EXIT(SENDER));
 	pthread_exit(NULL);
+}
+
+AuthorizationEngines createAuthorizationEngines(const size_t maxAuthServers)
+{
+	static const AuthorizationEngines invalidEngines = {0};
+
+	AuthorizationEngines engines = invalidEngines;
+
+	if (maxAuthServers <= 0) {
+		return engines;
+	}
+
+	engines = (AuthorizationEngines){
+	    .size    = maxAuthServers,
+	    .engines = calloc(maxAuthServers, sizeof(AuthorizationEngine)),
+	};
+
+	for (size_t i = 0; i < engines.size; ++i) {
+		FORK_FUNCTION(authorizationEngine);
+	}
+
+	return engines.engines == NULL ? invalidEngines : engines;
 }

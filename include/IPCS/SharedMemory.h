@@ -1,5 +1,5 @@
-#ifndef MESSAGE_QUEUE_H
-#define MESSAGE_QUEUE_H
+#ifndef SSASM_5G_IPCS_SHARED_MEMORY_H
+#define SSASM_5G_IPCS_SHARED_MEMORY_H
 
 /***************************************************************************
  * Project          ____ ____    _    ____  __  __      ____   ____
@@ -26,40 +26,10 @@
 
 #include <stddef.h>
 
-#define MAX_MESSAGE 256
+#define SHARED_MEMORY_KEY         1234
+#define SHARED_MEMORY_PERMISSIONS 0644
 
-typedef struct {
-	size_t totalData;
-	size_t authReqs;
-} ServiceStats;
+int createSharedMemory(const size_t mobileUsers);
+void deleteSharedMemory(const int id);
 
-
-typedef struct {
-	ServiceStats video;
-	ServiceStats music;
-	ServiceStats social;
-} Statistics;
-
-
-typedef struct {
-	long messageType;
-
-	Statistics stats;
-} StatisticsMessage;
-
-typedef struct 
-{
-	long messageType;
-	char message[30] ; 
-}Message;
-
-
-typedef enum {
-	ALERT_MESSAGE = 1,
-	STATISTICS_MESSAGE,
-	RESET_MESSAGE,
-} MessageType;
-
-int createMessageQueue(void);
-void deleteMessageQueue(const int id);
-#endif // !MESSAGE_QUEUE_H
+#endif // !SSASM_5G_IPCS_SHARED_MEMORY_H

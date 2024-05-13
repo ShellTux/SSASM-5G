@@ -24,7 +24,8 @@
 #include "MobileUser.h"
 
 #include "AuthorizationRequest.h"
-#include "AuthorizationRequestsManager.h"
+#include "IPCS/MessageQueue.h"
+#include "IPCS/Pipes.h"
 #include "utils/error.h"
 
 #include <fcntl.h>
@@ -34,10 +35,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 #include <sys/param.h>
 #include <unistd.h>
 
 int userPipeFD;
+int messageQueueID;
 
 int main(int argc, char *argv[])
 {
@@ -53,29 +57,16 @@ int main(int argc, char *argv[])
 	}
 
 	if ((userPipeFD = open(USER_PIPE, O_WRONLY)) < 0) {
-		HANDLE_ERROR("open: ");
+		HANDLE_ERROR("open: " USER_PIPE);
 	}
+
+	messageQueueID = openMessageQueue();
 
 	signal(SIGINT, sigintHandler);
 
 	MobileUser mobileUser = createMobileUserFromArgs(argv + 1, argc - 1);
 
-	size_t authorizationRequests = 0;
-	while (true) {
-		if (authorizationRequests > mobileUser.options.numPedidos) {
-			break;
-		}
-
-#define WRAPPER(ENUM)                                         \
-	sendMessage((AuthorizationRequest){                   \
-	    .mobileUserID  = mobileUser.options.userID,       \
-	    .reservingData = mobileUser.options.reservedData, \
-	    .service       = ENUM,                            \
-	});                                                   \
-	authorizationRequests++;
-		SERVICES
-#undef WRAPPER
-	}
+	sendDataServiceRequests(mobileUser);
 
 	return EXIT_SUCCESS;
 }
@@ -97,6 +88,7 @@ void sigintHandler(const int signal)
 {
 	(void) signal;
 	printf("Received SIGINT. Exiting...\n");
+	cleanup();
 	exit(EXIT_SUCCESS);
 }
 
@@ -118,6 +110,14 @@ MobileUser createMobileUserFromArgs(char **arguments, const int argumentsLength)
 	const int N = MIN(argumentsLength, MOBILE_USER_OPTIONS_NUM);
 	for (int i = 0; i < N; ++i) {
 		const char *const argument = arguments[i];
+
+		const int input = atoi(argument);
+		if (input < 0) {
+			fprintf(stderr,
+			        "Invalid argument: %s. Must be a positive "
+			        "integer.\n",
+			        argument);
+		}
 
 		mobileUser.arrayOptions[i] = atoi(argument);
 	}
@@ -149,3 +149,56 @@ void printMobileUser(FILE *file, const MobileUser mobileUser)
 	        mobileUser.options.reservedData,
 	        mobileUser.options.userID);
 }
+
+void listenToMessageAlerts(void)
+{
+	Message message;
+
+	bool running = true;
+	while (running) {
+		if (msgrcv(messageQueueID,
+		           &message,
+		           MESSAGE_SIZE,
+		           ALERT_MESSAGE_TYPE,
+		           0)
+		    < 0) {
+			HANDLE_ERROR("msgrcv: ");
+
+			printf("%s\n", dataCapAlertToString(message.alert));
+
+			switch (message.alert) {
+			case ALERT_100:
+			case EXIT:
+				running = 0;
+				break;
+
+			case OK:
+			case ALERT_90:
+			case ALERT_80:
+				break;
+			}
+		}
+	}
+}
+
+void sendDataServiceRequests(const MobileUser mobileUser)
+{
+	size_t authorizationRequests = 0;
+	while (true) {
+		if (authorizationRequests > mobileUser.options.numPedidos) {
+			break;
+		}
+
+#define SERVICE(ENUM, STRING)                                 \
+	sendMessage((AuthorizationRequest){                   \
+	    .mobileUserID  = mobileUser.options.userID,       \
+	    .reservingData = mobileUser.options.reservedData, \
+	    .service       = ENUM,                            \
+	});                                                   \
+	authorizationRequests++;
+		SERVICES
+#undef SERVICE
+	}
+}
+
+void cleanup(void) {}

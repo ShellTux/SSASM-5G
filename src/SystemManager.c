@@ -24,6 +24,8 @@
 #include "SystemManager.h"
 
 #include "AuthorizationRequestsManager.h"
+#include "IPCS/MessageQueue.h"
+#include "IPCS/SharedMemory.h"
 #include "MobileUser.h"
 #include "MonitorEngine.h"
 #include "SystemManager/config.h"
@@ -41,6 +43,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+int shmid;
+int msqid;
+
 int main(int argc, char **argv)
 {
 	for (int i = 0; i < argc; ++i) {
@@ -57,6 +62,10 @@ int main(int argc, char **argv)
 	const char *const configFilepath = argv[1];
 
 	if (!isValidSystemManagerConfigFile(configFilepath)) {
+		printDebug(stderr,
+		           DEBUG_ERROR,
+		           "Invalid config file: \"%s\"\n",
+		           configFilepath);
 		exit(EXIT_FAILURE);
 	}
 
@@ -68,37 +77,16 @@ int main(int argc, char **argv)
 
 	logMessage(LOG_SYSTEM_MANAGER_PROCESS_CREATED);
 
-	int shmid;
-	if ((shmid = shmget(SHARED_MEMORY_KEY,
-	                    sizeof(MobileUser)
-	                        * systemManagerConfig.options.mobileUsers,
-	                    SHARED_MEMORY_PERMISSIONS | IPC_CREAT))
-	    < 0) {
-		perror("IPC error: shmget");
-		exit(EXIT_FAILURE);
-	}
+	shmid = createSharedMemory(systemManagerConfig.options.mobileUsers);
+	msqid = createMessageQueue();
 
-	FORK_FUNCTION(authorizationRequestsManager, shmid);
+	FORK_FUNCTION(authorizationRequestsManager);
 	FORK_FUNCTION(monitorEngine);
-
-	MobileUser *sharedMemory = NULL;
-	if ((sharedMemory = shmat(shmid, NULL, 0)) == (MobileUser *) -1) {
-		perror("IPC error: shmat");
-		exit(EXIT_FAILURE);
-	}
 
 	int status;
 	while ((wait(&status)) > 0) {}
 
-	if (shmdt(sharedMemory) == -1) {
-		perror("IPC error: shmdt");
-		exit(EXIT_FAILURE);
-	}
-
-	if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-		perror("IPC error: shmctl");
-		exit(EXIT_FAILURE);
-	}
+	cleanResources();
 
 	logMessage(LOG_SIMULATOR_END);
 
@@ -112,4 +100,10 @@ void usage(const char *const programName)
 	printf("  -h, --help                   Print this usage message\n");
 
 	exit(EXIT_FAILURE);
+}
+
+void cleanResources(void)
+{
+	deleteSharedMemory(shmid);
+	deleteMessageQueue(msqid);
 }
