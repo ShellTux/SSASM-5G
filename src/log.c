@@ -23,16 +23,26 @@
 
 #include "log.h"
 
+#include <fcntl.h>
+#include <semaphore.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <utils/error.h>
 
-FILE *logFile = NULL;
+static sem_t *logSemaphore = NULL;
+FILE *logFile              = NULL;
 
 void logMessage(const char *const format, ...)
 {
+	initLogMutex();
 	openLogFile();
+
+	if (sem_wait(logSemaphore) == -1) {
+		HANDLE_ERROR("sem_wait: ");
+	}
+
 
 	time_t rawtime;
 	time(&rawtime);
@@ -64,6 +74,10 @@ void logMessage(const char *const format, ...)
 	va_end(args);
 
 #undef TIMESTAMP_FORMAT
+
+	if (sem_post(logSemaphore) == -1) {
+		HANDLE_ERROR("sem_post: ");
+	}
 }
 
 void openLogFile(void)
@@ -86,6 +100,8 @@ void openLogFile(void)
 
 void closeLogFile(void)
 {
+	closeLogMutex();
+
 	if (logFile == NULL) {
 		return;
 	}
@@ -138,4 +154,25 @@ void printDebug(FILE *file,
 	vprintf(format, args);
 	va_end(args);
 #endif
+}
+
+void initLogMutex(void)
+{
+	if (logSemaphore != NULL) {
+		return;
+	}
+
+	sem_unlink(LOG_MUTEX);
+
+	if ((logSemaphore
+	     = sem_open(LOG_MUTEX, O_CREAT | O_EXCL, LOG_PERMISSIONS, 1))
+	    == SEM_FAILED) {
+		HANDLE_ERROR("sem_open: " LOG_MUTEX);
+	}
+}
+
+void closeLogMutex(void)
+{
+	sem_close(logSemaphore);
+	sem_unlink(LOG_MUTEX);
 }

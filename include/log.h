@@ -34,9 +34,10 @@
 #define ANSI_YELLOW "\e[33m"
 #define ANSI_RESET  "\e[0m"
 
-#define TIME_FORMAT  "%H:%M:%S"
-#define LOG_FILEPATH "system-manager.log"
-#define LOG_MUTEX    "/tmp/log-mutex"
+#define TIME_FORMAT     "%H:%M:%S"
+#define LOG_FILEPATH    "system-manager.log"
+#define LOG_MUTEX       "log-mutex"
+#define LOG_PERMISSIONS 0644
 
 #define DEBUG_LEVELS                                       \
 	DEBUG_LEVEL(DEBUG_OK, "OK", ANSI_GREEN)            \
@@ -51,7 +52,9 @@ typedef enum {
 } DebugLevel;
 
 void openLogFile(void);
+void initLogMutex(void);
 void closeLogFile(void);
+void closeLogMutex(void);
 void logMessage(const char *const format, ...);
 char *debugLevelString(const DebugLevel level);
 char *debugLevelColor(const DebugLevel level);
