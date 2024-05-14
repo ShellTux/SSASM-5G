@@ -1,9 +1,9 @@
 ![UC LOGO](/assets/uc-logo.png)
 
 ---
-title: Trabalho Prático - Meta 1 - Relatório
+title: Trabalho Prático - SO - Relatório
 subtitle: Sistemas Operativos
-author: David Carvalheiro, Luís Góis
+author: ["David Carvalheiro", "Luís Góis"]
 date: \today
 ---
 
@@ -26,5 +26,17 @@ threads de um mesmo processo, decidiu-se usar mutexes. Uma vez que permitem o
 acesso de apenas uma thread por vez.
 
 Desta forma, mantém-se a integridade dos dados.
+
+## Shared Memory
+
+Utilizou-se a memória partilhada para armazenar diversos tipos de dados. 
+
+## Message Queue
+
+As mensagens circulantes nesta fila, derivam de uma construção com um
+messageType e com um conjunto de estatísticas ou alertas, sendo a diferenciação
+resultante do messageType. Não necessitam de mecanismos de sincronização porque
+já são seguras por si.
+
 
 ![Diagrama](/assets/diagram.png)
