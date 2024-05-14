@@ -1,27 +1,79 @@
-ARCHIVE     = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
-INCLUDE_DIR = include
-OBJ_DIR     = obj
-SRC_DIR     = src
-TARGETS     = 5g_auth_platform mobile_user backoffice_user
+# Variables {{{
 
-HEADERS  = $(shell find $(INCLUDE_DIR) \
+# Variables - Repo Source Codde {{{
+
+ASSETS_DIR      = assets
+DOCS_DIR        = docs
+INCLUDE_DIRS    = include
+OBJ_DIR         = obj
+PANDOC_DATA_DIR = pandoc
+SRC_DIR         = src
+TARGETS_DIR     = build
+TARGETS         = 5g_auth_platform mobile_user backoffice_user
+
+SOURCES := $(shell find $(SRC_DIR) \
+	   -type f \
+	   -name "*.c" -o \
+	   -name "*.cpp" 2>/dev/null | tr '\n' ' ')
+HEADERS  = $(shell find $(INCLUDE_DIRS) \
 	   -name "*.h" -o \
 	   -name "*.hpp" \
 	   2>/dev/null | tr '\n' ' ')
-SOURCES  = $(shell find $(SRC_DIR) \
-	   -name "*.c" -o \
-	   -name "*.cpp" \
-	   2>/dev/null | tr '\n' ' ')
 
-CC      = gcc
-CFLAGS  = -Wall -Wextra -Werror
+GITIGNORE := $(OBJ_DIR) $(TARGETS_DIR) $(TARGETS)
+
+define newline
+
+
+endef
+
+# }}}
+
+# Variables - Documentation {{{
+
+ARCHIVE             = SSASM-5G-PL7-PL8-DavidCarvalheiro-LuísGóis.zip
+INSTALLATION_MANUAL =
+PRESENTATION        =
+REPORT              = relatorio.pdf
+USER_MANUAL         =
+
+PANDOC_OPTS      := --resource-path=.:..:$(DOCS_DIR):$(ASSETS_DIR)
+PANDOC_THEME_DIR := $(PANDOC_DATA_DIR)/themes
+PANDOC_THEME     :=
+
+PANDOC_OPTS += --variable=theme:Warsaw
+
+ifneq ($(wildcard $(PANDOC_THEME:%=$(PANDOC_THEME_DIR)/%.theme)),)
+PANDOC_OPTS += $(PANDOC_THEME:%=--highlight-style=$(PANDOC_THEME_DIR)/%.theme)
+endif
+
+ifneq ($(wildcard $(PANDOC_DATA_DIR)),)
+	PANDOC_OPTS += \
+		       $(foreach filter,\
+		       $(wildcard $(PANDOC_DATA_DIR)/filters/*.lua),\
+		       --lua-filter=$(filter))
+endif
+
+DOCUMENTS     := $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL)
+PRESENTATIONS := $(PRESENTATION)
+
+GITIGNORE += $(DOCUMENTS) $(PRESENTATIONS)
+
+# }}}
+
+# Variables - Compilation {{{
+
+CC     = gcc
+CCP    = g++
+CFLAGS = -Wall -Wextra -Werror
+LINKS  =
+
 CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable
 CFLAGS += -Wno-error=unused-but-set-variable
 CFLAGS += -fdiagnostics-color=always
-CFLAGS += -I$(shell realpath $(INCLUDE_DIR))
 CFLAGS += -pthread
-LINKS   =
+CFLAGS += $(INCLUDE_DIRS:%=-I%)
 
 CCACHE_EXISTS := $(shell command -v ccache)
 ifdef CCACHE_EXISTS
@@ -29,29 +81,262 @@ ifdef CCACHE_EXISTS
 	CXX       := ccache $(CXX)
 endif
 
+# }}}
+
+# Variables - Miscellaneous {{{
+
+OPEN = xdg-open
+
 ifneq ($(shell command -v batcat 2>/dev/null),)
 	BAT = batcat
 else
 	BAT = bat
 endif
 
-all: warning $(TARGETS)
+# }}}
 
-debug: CFLAGS += -g -DDEBUG=1
-debug: clean all
+# }}}
 
-$(OBJ_DIR)/%.c.o: %.c $(HEADERS)
-	@printf "\n\033[31m"
-	@printf "########################\n"
-	@printf "Building %s\n" $@
-	@printf "########################\n"
-	@printf "\033[0m\n"
-	mkdir --parents `dirname "$@"`
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Rules {{{
 
-.PHONY: format
-format:
-	clang-format -i $(SOURCES) $(HEADERS)
+# Rules - Custom {{{
+
+all: warning $(VENV) $(TARGETS)
+
+.PHONY: gdb
+gdb: MAKEFLAGS += --always-make --no-print-directory
+gdb: CFLAGS += -g -Og
+gdb:
+	$(MAKE) $(MAKEFLAGS) CFLAGS="$(CFLAGS)" $(TARGETS)
+
+.PHONY: debug
+debug: MAKEFLAGS += --always-make --no-print-directory
+debug: CFLAGS += -DDEBUG=1
+debug:
+	$(MAKE) $(MAKEFLAGS) CFLAGS="$(CFLAGS)" $(TARGETS)
+
+.PHONY: rebuild
+rebuild: MAKEFLAGS += --always-make --no-print-directory
+rebuild:
+	$(MAKE) $(MAKEFLAGS) $(TARGETS)
+
+.PHONY: run
+run: warning $(TARGETS)
+	@for target in $(TARGETS) ; do echo ./$$target ; ./$$target ; done
+
+clean-ipcs:
+ifeq ($(shell echo "$$(id --user) < 1000" | bc), 0)
+	ipcrm --all
+else
+	@echo This rule is meant to remove non-root ipcs resources
+endif
+
+.PHONY: watch
+watch:
+	$(eval INOTIFYWAIT_OPTS = --quiet --event modify)
+
+	@while true ;\
+	do \
+		$(MAKE) warning --no-print-directory || exit 1 ;\
+		$(MAKE) --no-print-directory $(TARGETS); \
+		inotifywait $(INOTIFYWAIT_OPTS) $(SOURCES) $(HEADERS); \
+	done
+
+.PHONY: PRINT-MACROS
+PRINT-MACROS:
+	@make --print-data-base \
+		| grep -A1 "^# makefile" \
+		| grep -v "^#\|^--" \
+		| sort
+
+.PHONY: warning
+warning:
+ifneq ($(shell pwd | grep --count ' '),0)
+	@echo -e '\033[33m[WARNING]\033[0m:' \
+		'Current working directory of Makefile contains spaces.' \
+		'This is known to cause bugs.'
+	@echo -e '\033[36m[INFO]\033[0m: pwd: $(shell pwd)'
+	@echo 'Please Try compiling by making sure' \
+		'the full path to this Makefile does not contain spaces.'
+	-exit 1
+endif
+
+clang-tidy: .clang-tidy
+	parallel --jobs 4 --group clang-tidy --quiet ::: $(SOURCES)
+
+define CLANG_TIDY_CONTENT
+Checks: -*,readability-identifier-naming
+CheckOptions:
+  - { key: readability-identifier-naming.EnumCase,            value: CamelCase}
+  - { key: readability-identifier-naming.EnumConstantCase,    value: UPPER_CASE}
+  - { key: readability-identifier-naming.FunctionCase,        value: camelBack}
+  - { key: readability-identifier-naming.StructCase,          value: CamelCase}
+  - { key: readability-identifier-naming.MacroDefinitionCase, value: UPPER_CASE}
+endef
+
+.clang-tidy:
+	@echo '$(subst $(newline),\n,$(CLANG_TIDY_CONTENT))' | tee $@
+
+clang-format: .clang-format
+	clang-format --verbose -i $(SOURCES) $(HEADERS) 2>&1
+
+define CLANG_FORMAT_CONTENT
+---
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
+AlignOperands: Align
+# AlignTrailingComments:
+#   Kind: Always
+#   OverEmptyLines: 2
+AlignEscapedNewlines: Left
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  BeforeElse: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: All
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+ColumnLimit: 80
+IncludeBlocks: Regroup
+IndentCaseLabels: false
+IndentPPDirectives: BeforeHash
+IndentWidth: 8
+IndentWrappedFunctionNames: false
+JavaScriptQuotes: Single
+JavaScriptWrapImports: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+Language: Cpp
+MaxEmptyLinesToKeep: 2
+PointerAlignment: Right
+ReflowComments: false
+SortIncludes: true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 8
+UseTab: ForIndentation
+endef
+
+.clang-format:
+	@echo '$(subst $(newline),\n,$(CLANG_FORMAT_CONTENT))' | tee $@
+
+setup: .clangd
+
+.PHONY: .clangd
+.clangd: GITIGNORE += .clangd
+.clangd: .gitignore
+	rm --force $@
+
+	@echo Diagnostics: | tee --append $@
+	@echo '  UnusedIncludes: Strict' | tee --append $@
+	@echo '  MissingIncludes: Strict' | tee --append $@
+	@echo CompileFlags: | tee --append $@
+	@echo '  Add:' | tee --append $@
+
+	@for flag in $(CFLAGS) ; do echo "    - $$flag" | tee --append $@ ; done
+
+.gitignore:
+ifneq ($(shell git rev-parse --show-toplevel 2>/dev/null),)
+	$(eval APPEND_GITIGNORE := tr ' ' '\n' | tee --append $@)
+	@echo $(GITIGNORE) | tr ' ' '\n' | tee $@
+	@echo | $(APPEND_GITIGNORE)
+
+	$(eval IGNORE_API = https://www.toptal.com/developers/gitignore/api)
+
+ifneq ($(SOURCES),)
+	curl --silent --location $(IGNORE_API)/c >> $@
+endif
+ifneq ($(VENV),)
+	curl --silent --location $(IGNORE_API)/python >> $@
+endif
+
+make.snippets: Makefile
+	@echo snippet Template \"Makefile Template\" | tee $@
+
+	sed 's|^|\t|' $< | tee --append $@
+	sed -i '0,/assets/s//$${1:assets}/' $@
+	sed -i '0,/docs/s//$${2:docs}/' $@
+	sed -i '0,/$$(shell pwd)\/include/s//$${3:$$(shell pwd)\/include}/' $@
+	sed -i '0,/obj/s//$${4:obj}/' $@
+	sed -i '0,/pandoc/s//$${5:pandoc}/' $@
+	sed -i '0,/src/s//$${6:src}/' $@
+	sed -i '0,/build/s//$${7:build}/' $@
+	sed -i '0,/hello-world factorial/s//$${8:target}/' $@
+	sed -i '0,/archive.zip/s//$${9:archive.zip}/' $@
+	sed -i '0,/installation-manual.pdf/s//$${10:installation-manual.pdf}/' \
+		$@
+	sed -i '0,/presentation.pdf/s//$${11:presentation.pdf}/' $@
+	sed -i '0,/report.pdf/s//$${12:report.pdf}/' $@
+	sed -i '0,/user-manual.pdf/s//$${13:user-manual.pdf}/' $@
+	sed -i '0,/onehalfdark/s//$${14:onehalfdark}/' $@
+	sed -i '0,/venv/s//$${15:venv}/' $@
+	sed -i '0,/gcc/s//$${16:gcc}/' $@
+	sed -i '0,/g++/s//$${17:g++}/' $@
+	sed -i '0,/-Wall -Wextra -Werror/s//$${18:-Wall -Wextra -Werror}/' $@
+	# TODO: Add Links
+	sed -i '0,/xdg-open/s//$${19:xdg-open}/' $@
+	sed -i '0,/-g -Og/s//$${20:-g -Og}/' $@
+	sed -i '0,/-DDEBUG=1/s//$${21:-DDEBUG=1}/' $@
+
+	sed -i 's|\$$\$$|\$$\$$|g' $@
+
+endif
 
 .PHONY: check
 check:
@@ -65,96 +350,98 @@ check:
 		$(SOURCES) $(HEADERS) \
 		| grep '^'
 
-_SOURCES = \
-	  AuthorizationEngine \
-	  AuthorizationRequest \
-	  AuthorizationRequestsManager \
-	  IPCS/MessageQueue \
-	  IPCS/Pipes \
-	  IPCS/SharedMemory \
-	  log \
-	  MonitorEngine \
-	  SystemManager \
-	  SystemManager/config \
-	  utils/string
-5g_auth_platform: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+.PHONY: explore
+explore:
+	find $(SRC_DIR) $(INCLUDE_DIRS) -type f \
+		| fzf --preview "$(BAT) --color=always --style=numbers --line-range=:500 {}" \
+		--preview='$(BAT) --color=always --style=numbers {}' \
+		--bind='enter:execute($(BAT) --paging=always {})+clear-query' \
+		--preview-window=right:70% || true
 
-_SOURCES = BackOfficeUser IPCS/MessageQueue BackOfficeUser/Command log
-backoffice_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+.PHONY: clean
+clean:
+	@printf "\n\033[31m"
+	@printf "########################\n"
+	@printf "Cleaning ...\n" $@
+	@printf "########################\n"
+	@printf "\033[0m\n"
+	rm --force $(TARGETS) $(DOCUMENTS) $(PRESENTATIONS)
+	rm --recursive --force $(OBJ_DIR) $(VENV)
+	find . -type f -name '*.pyc' -delete
 
-_SOURCES = MobileUser AuthorizationRequest IPCS/MessageQueue log
-mobile_user: $(_SOURCES:%=$(OBJ_DIR)/$(SRC_DIR)/%.c.o)
+help:
+	man
 
-$(TARGETS): MAKEFLAGS += --jobs=4 --output-sync=target
-$(TARGETS): %:
-	$(CC) $(CFLAGS) -o $@ $^
+# }}}
 
-relatorio.pdf: docs/relatorio.md
-	sed 's|/assets|assets|g' $< \
-		| pandoc \
-		--standalone \
-		--from=markdown \
-		--resource-path=assets \
-		--output $@
+# Rules - Documentation {{{
+
+$(PRESENTATIONS): %.pdf: $(DOCS_DIR)/%.md
+	pandoc $(PANDOC_OPTS) --to=beamer --output=$@ $<
+
+$(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
+	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 archive: $(ARCHIVE)
 
 .PHONY: $(ARCHIVE)
-$(ARCHIVE): relatorio.pdf
-	git archive --output=$@ --add-file=$< HEAD
+$(ARCHIVE): $(DOCUMENTS) $(PRESENTATIONS)
+	git archive --output=$@ $(^:%=--add-file=%) HEAD
 
-setup: .clangd
+# }}}
 
-.PHONY: .clangd
-.clangd:
-	rm --force $@
+# Rules - Compilation {{{
 
-	@echo Diagnostics: | tee --append $@
-	@echo '  UnusedIncludes: Strict' | tee --append $@
-	@echo '  MissingIncludes: Strict' | tee --append $@
-	@echo CompileFlags: | tee --append $@
-	@echo '  Add:' | tee --append $@
+$(OBJ_DIR)/%.c.o: %.c $(HEADERS)
+	@printf "\n\033[31m"
+	@printf "########################\n"
+	@printf "Building %s\n" $@
+	@printf "########################\n"
+	@printf "\033[0m\n"
+	mkdir --parents "$$(dirname "$@")"
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-	@for flag in $(CFLAGS) ; do echo "    - $$flag" | tee --append $@ ; done
+$(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
+	@printf "\n\033[31m"
+	@printf "########################\n"
+	@printf "Building %s\n" $@
+	@printf "########################\n"
+	@printf "\033[0m\n"
+	mkdir --parents "$$(dirname "$@")"
+	$(CCP) $(CFLAGS) -c -o $@ $<
 
-.PHONY: clean
-clean:
-	@printf "Cleaning\n"
-	rm -f $(TARGETS)
-	rm -rf $(OBJ_DIR)
+# TODO: Add Parallel Compilation
 
-.PHONY: clean-ipcs
-clean-ipcs:
-	@test $(shell id --user) -ge 1000 \
-		&& echo ipcrm --all && ipcrm --all \
-		|| printf '%s\n' 'This rule is meant to remove non-root ipc resources'
+5g_auth_platform: $(addprefix $(OBJ_DIR)/$(SRC_DIR)/, $(addsuffix .c.o,  \
+	AuthorizationEngine \
+	AuthorizationRequest \
+	AuthorizationRequestsManager \
+	IPCS/MessageQueue \
+	IPCS/Pipes \
+	IPCS/SharedMemory \
+	log \
+	MonitorEngine \
+	SystemManager \
+	SystemManager/config \
+	utils/string))
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-.PHONY: watch
-watch:
-	@while true ;\
-	do \
-		clear ; \
-		$(MAKE) warning --no-print-directory || exit 1 \
-		$(MAKE) --no-print-directory; \
-		inotifywait --quiet --event modify --recursive $(INCLUDE_DIR) --recursive $(SRC_DIR); \
-	done
+backoffice_user: $(addprefix $(OBJ_DIR)/$(SRC_DIR)/, $(addsuffix .c.o,  \
+	BackOfficeUser \
+	IPCS/MessageQueue \
+	BackOfficeUser/Command \
+	log))
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-.PHONY: PRINT-MACROS
-PRINT-MACROS:
-	@make -p MAKE-MACROS| grep -A1 "^# makefile" | grep -v "^#\|^--" | sort
 
-.PHONY: warning
-warning:
-	@pwd | grep --quiet ' ' \
-		&& printf '\033[33m[WARNING]\033[0m: %s\n' 'Current working directory of Makefile contains spaces. This is known to cause bugs.' \
-		&& printf '\033[36m[INFO]\033[0m:    pwd: "%s"\n' "$(shell pwd)" \
-		&& printf '%s\n' 'Please Try compiling by making sure the full path to this Makefile does not contain spaces.' \
-		&& exit 1 \
-		|| true
+mobile_user: $(addprefix $(OBJ_DIR)/$(SRC_DIR)/, $(addsuffix .c.o,  \
+	MobileUser \
+	AuthorizationRequest \
+	IPCS/MessageQueue log))
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-.PHONY: explore
-explore:
-	find $(SRC_DIR) $(INCLUDE_DIR) -type f -name "*.[ch]" \
-		| fzf --preview "$(BAT) --color=always --style=numbers {}" \
-		--bind='enter:execute($(BAT) --paging=always {})+clear-query' \
-		--preview-window=right:70% || true
+# }}}
+
+# }}}
+
+# vim: foldmethod=marker foldlevel=1
