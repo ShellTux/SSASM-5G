@@ -40,7 +40,10 @@
 
 int messageQueueID;
 int backPipeFD;
-
+/**
+ * Função responsável pela inicialização do BackOfficeUser 
+ * @return o código de saída do programa
+ */
 int main()
 {
 	signal(SIGINT, sigintHandler);
@@ -54,6 +57,10 @@ int main()
 
 	return EXIT_SUCCESS;
 }
+/**
+ * Executa um comando recebido pelo BackOfficeUser
+ * @param command o comando a ser executado
+ */
 
 void executeCommand(const Command command)
 {
@@ -90,6 +97,11 @@ void executeCommand(const Command command)
 	}
 }
 
+/**
+ * Função para encerrar corretamente o BakOffice em caso de um sinal ex. (Ctrl+C).
+ * @param signal o sinal recebido
+ */
+
 void sigintHandler(const int signal)
 {
 	(void) signal;
@@ -97,6 +109,9 @@ void sigintHandler(const int signal)
 	close(backPipeFD);
 	exit(EXIT_SUCCESS);
 }
+/**
+ * Escuta por mensagens na fila de mensagens e imprime estatísticas.
+ */
 
 void listenForMessages(void)
 {
@@ -111,7 +126,9 @@ void listenForMessages(void)
 		printStatistics(stdout, message.stats);
 	}
 }
-
+/**
+ * Escuta por comandos do usuário no terminal e executa-os.
+ */
 void listenForCommands(void)
 {
 	while (true) {

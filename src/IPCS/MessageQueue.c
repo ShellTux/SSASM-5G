@@ -31,7 +31,11 @@
 #include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-
+/**
+ * Converte um DataCapAlert em uma string
+ * @param alert O alerta de limite de dados
+ * @return A representação em string do alerta
+ */
 char *dataCapAlertToString(const DataCapAlert alert)
 {
 	switch (alert) {
@@ -44,7 +48,11 @@ char *dataCapAlertToString(const DataCapAlert alert)
 		return NULL;
 	}
 }
-
+/**
+ * Imprime as estatísticas em um ficheiro
+ * @param file O ficheiro onde as estatísticas serão impressas
+ * @param stats As estatísticas a serem impressas
+ */
 void printStatistics(FILE *file, Statistics stats)
 {
 	if (file == NULL) {
@@ -60,7 +68,10 @@ void printStatistics(FILE *file, Statistics stats)
 	        stats.social.totalData,
 	        stats.social.authReqs);
 }
-
+/**
+ * Cria uma fila de mensagens
+ * @return O ID da fila de mensagens criada
+ */
 int createMessageQueue(void)
 {
 	int id;
@@ -74,7 +85,10 @@ int createMessageQueue(void)
 
 	return id;
 }
-
+/*
+*abre a fila de mensagens
+*@return O ID da fila de mensagens 
+*/
 int openMessageQueue(void)
 {
 	int id;
@@ -86,7 +100,10 @@ int openMessageQueue(void)
 
 	return id;
 }
-
+/**
+ * Exclui uma fila de mensagens existente
+ * @param id O ID da fila de mensagens a ser excluída.
+ */
 void deleteMessageQueue(const int id)
 {
 	if (msgctl(id, IPC_RMID, NULL) < 0) {

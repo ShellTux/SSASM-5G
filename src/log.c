@@ -29,6 +29,11 @@
 #include <time.h>
 
 FILE *logFile = NULL;
+/**
+ * Registra uma mensagem no ficheiro de log e no terminal
+ * @param format a string de formato da mensagem
+ * @param ... os argumentos variáveis a serem formatados e registrados
+ */
 
 void logMessage(const char *const format, ...)
 {
@@ -65,6 +70,9 @@ void logMessage(const char *const format, ...)
 
 #undef TIMESTAMP_FORMAT
 }
+/**
+ * Abre o ficheiro de log para escrita
+ */
 
 void openLogFile(void)
 {
@@ -83,7 +91,9 @@ void openLogFile(void)
 		           LOG_FILEPATH);
 	}
 }
-
+/*
+*fecha o ficheiro de log
+*/
 void closeLogFile(void)
 {
 	if (logFile == NULL) {
@@ -94,6 +104,11 @@ void closeLogFile(void)
 
 	printDebug(stdout, DEBUG_INFO, "Closed log file\n");
 }
+/**
+ * Retorna a string associada ao nível de depuração especificado
+ * @param level o nível de depuração
+ * @return a string associada ao nível de depuração
+ */
 
 char *debugLevelString(const DebugLevel level)
 {
@@ -107,6 +122,11 @@ char *debugLevelString(const DebugLevel level)
 
 	return NULL;
 }
+/**
+ * Retorna a cor associada ao nível de depuração especificado
+ * @param level o nível de depuração
+ * @return a cor associada ao nível de depuração
+ */
 
 char *debugLevelColor(const DebugLevel level)
 {
@@ -120,6 +140,13 @@ char *debugLevelColor(const DebugLevel level)
 
 	return NULL;
 }
+/**
+ * Imprime uma mensagem de depuração, se o modo de depuração estiver ativado
+ * @param file o ficheiro onde a mensagem será impressa
+ * @param level o nível de depuração da mensagem
+ * @param format a string de formato da mensagem
+ * @param ... os argumentos variáveis a serem formatados e impressos
+ */
 
 void printDebug(FILE *file,
                 const DebugLevel level,
