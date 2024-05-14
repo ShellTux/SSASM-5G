@@ -39,7 +39,7 @@ USER_MANUAL         =
 
 PANDOC_OPTS      := --resource-path=.:..:$(DOCS_DIR):$(ASSETS_DIR)
 PANDOC_THEME_DIR := $(PANDOC_DATA_DIR)/themes
-PANDOC_THEME     :=
+PANDOC_THEME     := 
 
 PANDOC_OPTS += --variable=theme:Warsaw
 
@@ -63,23 +63,30 @@ GITIGNORE += $(DOCUMENTS) $(PRESENTATIONS)
 
 # Variables - Compilation {{{
 
-CC     = gcc
-CCP    = g++
-CFLAGS = -Wall -Wextra -Werror
-LINKS  =
+# Program for compiling C programs; default cc
+CC       = gcc
+# Program for compiling C++ programs; default g++
+CXX      = g++
+# Extra flags to give to the C compiler
+CFLAGS   = -Wall -Wextra -Werror
+# Extra flags to give to the C++ compiler
+CXXFLAGS = -Wall -Wextra -Werror
+# Extra flags to give to the C preprocessor
+CPPFLAGS =
+# Extra flags to give to compilers when they are supposed to invoke the linker
+LDFLAGS  = -pthread
+
+CCACHE_EXISTS := $(shell ccache -V)
+ifdef CCACHE_EXISTS
+    CC        := ccache $(CC)
+    CXX       := ccache $(CXX)
+endif
 
 CFLAGS += -Wno-error=unused-parameter
 CFLAGS += -Wno-error=unused-variable
 CFLAGS += -Wno-error=unused-but-set-variable
 CFLAGS += -fdiagnostics-color=always
-CFLAGS += -pthread
 CFLAGS += $(INCLUDE_DIRS:%=-I%)
-
-CCACHE_EXISTS := $(shell command -v ccache)
-ifdef CCACHE_EXISTS
-	CC        := ccache $(CC)
-	CXX       := ccache $(CXX)
-endif
 
 # }}}
 
@@ -101,6 +108,7 @@ endif
 
 # Rules - Custom {{{
 
+.PHONY: all
 all: warning $(VENV) $(TARGETS)
 
 .PHONY: gdb
@@ -111,9 +119,9 @@ gdb:
 
 .PHONY: debug
 debug: MAKEFLAGS += --always-make --no-print-directory
-debug: CFLAGS += -DDEBUG=1
+debug: CPPFLAGS += -DDEBUG=1
 debug:
-	$(MAKE) $(MAKEFLAGS) CFLAGS="$(CFLAGS)" $(TARGETS)
+	$(MAKE) $(MAKEFLAGS) CPPFLAGS="$(CPPFLAGS)" $(TARGETS)
 
 .PHONY: rebuild
 rebuild: MAKEFLAGS += --always-make --no-print-directory
@@ -124,6 +132,7 @@ rebuild:
 run: warning $(TARGETS)
 	@for target in $(TARGETS) ; do echo ./$$target ; ./$$target ; done
 
+.PHONY: clean-ipcs
 clean-ipcs:
 ifeq ($(shell echo "$$(id --user) < 1000" | bc), 0)
 	ipcrm --all
@@ -161,6 +170,7 @@ ifneq ($(shell pwd | grep --count ' '),0)
 	-exit 1
 endif
 
+.PHONY: clang-tidy
 clang-tidy: .clang-tidy
 	parallel --jobs 4 --group clang-tidy --quiet ::: $(SOURCES)
 
@@ -174,9 +184,11 @@ CheckOptions:
   - { key: readability-identifier-naming.MacroDefinitionCase, value: UPPER_CASE}
 endef
 
+.PHONY: .clang-tidy
 .clang-tidy:
 	@echo '$(subst $(newline),\n,$(CLANG_TIDY_CONTENT))' | tee $@
 
+.PHONY: clang-format
 clang-format: .clang-format
 	clang-format --verbose -i $(SOURCES) $(HEADERS) 2>&1
 
@@ -276,9 +288,9 @@ endef
 .clang-format:
 	@echo '$(subst $(newline),\n,$(CLANG_FORMAT_CONTENT))' | tee $@
 
+.PHONY: setup
 setup: .clangd
 
-.PHONY: .clangd
 .clangd: GITIGNORE += .clangd
 .clangd: .gitignore
 	rm --force $@
@@ -310,27 +322,27 @@ make.snippets: Makefile
 	@echo snippet Template \"Makefile Template\" | tee $@
 
 	sed 's|^|\t|' $< | tee --append $@
-	sed -i '0,/assets/s//$${1:assets}/' $@
-	sed -i '0,/docs/s//$${2:docs}/' $@
+	sed -i '0,/$(ASSETS_DIR)/s//$${1:$(ASSETS_DIR)}/' $@
+	sed -i '0,/$(DOCS_DIR)/s//$${2:$(DOCS_DIR)}/' $@
 	sed -i '0,/$$(shell pwd)\/include/s//$${3:$$(shell pwd)\/include}/' $@
-	sed -i '0,/obj/s//$${4:obj}/' $@
-	sed -i '0,/pandoc/s//$${5:pandoc}/' $@
-	sed -i '0,/src/s//$${6:src}/' $@
-	sed -i '0,/build/s//$${7:build}/' $@
-	sed -i '0,/hello-world factorial/s//$${8:target}/' $@
-	sed -i '0,/archive.zip/s//$${9:archive.zip}/' $@
-	sed -i '0,/installation-manual.pdf/s//$${10:installation-manual.pdf}/' \
+	sed -i '0,/$(OBJ_DIR)/s//$${4:$(OBJ_DIR)}/' $@
+	sed -i '0,/$(PANDOC_DATA_DIR)/s//$${5:$(PANDOC_DATA_DIR)}/' $@
+	sed -i '0,/$(SRC_DIR)/s//$${6:$(SRC_DIR)}/' $@
+	sed -i '0,/$(TARGETS_DIR)/s//$${7:$(TARGETS_DIR)}/' $@
+	sed -i '0,/$(TARGETS)/s//$${8:$(TARGETS)}/' $@
+	sed -i '0,/$(ARCHIVE)/s//$${9:$(ARCHIVE)}/' $@
+	sed -i '0,/$(INSTALLATION_MANUAL)/s//$${10:$(INSTALLATION_MANUAL)}/' \
 		$@
-	sed -i '0,/presentation.pdf/s//$${11:presentation.pdf}/' $@
-	sed -i '0,/report.pdf/s//$${12:report.pdf}/' $@
-	sed -i '0,/user-manual.pdf/s//$${13:user-manual.pdf}/' $@
-	sed -i '0,/onehalfdark/s//$${14:onehalfdark}/' $@
-	sed -i '0,/venv/s//$${15:venv}/' $@
-	sed -i '0,/gcc/s//$${16:gcc}/' $@
-	sed -i '0,/g++/s//$${17:g++}/' $@
+	sed -i '0,/$(PRESENTATION)/s//$${11:$(PRESENTATION)}/' $@
+	sed -i '0,/$(REPORT)/s//$${12:$(REPORT)}/' $@
+	sed -i '0,/$(USER_MANUAL)/s//$${13:$(USER_MANUAL)}/' $@
+	sed -i '0,/onehalfdark/s//$${14}/' $@
+	sed -i '0,/$(VENV)/s//$${15:$(VENV)}/' $@
+	sed -i '0,/$(CC)/s//$${16:$(CC)}/' $@
+	sed -i '0,/$(CXX)/s//$${17:$(CXX)}/' $@
 	sed -i '0,/-Wall -Wextra -Werror/s//$${18:-Wall -Wextra -Werror}/' $@
 	# TODO: Add Links
-	sed -i '0,/xdg-open/s//$${19:xdg-open}/' $@
+	sed -i '0,/$(OPEN)/s//$${19:$(OPEN)}/' $@
 	sed -i '0,/-g -Og/s//$${20:-g -Og}/' $@
 	sed -i '0,/-DDEBUG=1/s//$${21:-DDEBUG=1}/' $@
 
@@ -369,6 +381,7 @@ clean:
 	rm --recursive --force $(OBJ_DIR) $(VENV)
 	find . -type f -name '*.pyc' -delete
 
+.PHONY: help
 help:
 	man
 
@@ -382,6 +395,7 @@ $(PRESENTATIONS): %.pdf: $(DOCS_DIR)/%.md
 $(DOCUMENTS): %.pdf: $(DOCS_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
+.PHONY: archive
 archive: $(ARCHIVE)
 
 .PHONY: $(ARCHIVE)
@@ -408,7 +422,7 @@ $(OBJ_DIR)/%.cpp.o: %.cpp $(HEADERS)
 	@printf "########################\n"
 	@printf "\033[0m\n"
 	mkdir --parents "$$(dirname "$@")"
-	$(CCP) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) -c -o $@ $<
 
 # TODO: Add Parallel Compilation
 
